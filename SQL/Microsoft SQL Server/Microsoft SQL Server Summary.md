@@ -1,3 +1,5 @@
+<img src="assets/microsoft-sql-server-logo.svg" width="250" height="250">
+
 # Microsoft SQL Server Summary
 
 ## Table of Contents
