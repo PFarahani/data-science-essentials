@@ -218,7 +218,8 @@ INNER JOIN
 ORDER BY
     s.name
 ```
-![Assigned schemas](assets/image3.jpg "Assigned schemas")
+![image3](assets/image3.jpg "Assigned schemas")
+
 In the results we can see *OurSchema* is assigned to the default user (*dbo*)
 And *OurSchema2* is assigned to the user named "*guest*"
 
@@ -303,11 +304,28 @@ Table is in First Normal Form if:
 3. Each row of a table must be unique
 4. A table should not have any repeating groups
 
-![table1](assets/table1.jpg)
+```
+FullName                BookTitle
+--------                ---------
+Kurt Heinz, 9997        Think And Grow Rich
+Michael Toner           The Power of Now
+James Salas, Repeat     The Selfish Gene, The Power of Now
+Felicia Reed, Repeat    Astrophysics for People in a Hurry, The Power of Now
+```
 The above table is not normalized and everything is saved in the same table
 
 The table bellow is normalized in 1NF.
-![table2](assets/table2.jpg)
+
+```
+CustomerID  FirstName   LastName    CustomerType    BookTitle
+----------  ---------   --------    ------------    ---------
+1           Kurt        Heinz       None-Repeat     Think And Grow Rich
+2           Michael     Toner       None-Repeat     The Power of Now
+3           James       Salas       Repeat          The Selfish Gene
+4           Felicia     Reed        Repeat          Astrophysics for People in a Hurry
+3           James       Salas       Repeat          The Power of Now
+4           Felicia     Reed        Repeat          The Power of Now
+```
 
 **Note:** The problem with the first normal form is that there is a lot of redundancy and if you change one record it has other ones which are related to it you would need to make the same type of change. Otherwise they will be wrong and over time this can get very cumbersome.<br>
 So, if we change a customer type for James for example in the previous table, we would have to do it twice. If we had him there millions of times, we would have to perform to change millions of times. This is known as "**Functional Dependency**" in the current setup.
@@ -316,7 +334,19 @@ Table is in Second Normal Form if:
 1. It has to be already in First Normal Form
 2. Each non key field must be functionally dependent on the primary key (Every non key fields are directly related to the primary key)
 
-![table3](assets/table3.jpg)
+```
+Electric toothbrush models
+---------------------------------------------------------------------------
+Manufacturer    Model           ModuleFullName          ManufacturerCountry
+------------    -----           --------------          -------------------
+Forte           X-Prime         Forte X-Prime           Italy
+Forte           Ultraclean      Forte Ultraclean        Italy
+Dent-o-Fresh    EZbrush         Dent-o-Fresh EZbrush    USA
+Brushmaster     SuperBrush      Brushmaster SuperBrush  USA
+Kobayashi       ST-60           Kobayashi ST-60         Japan
+Hoch            Toothmaster     Hoch Toothmaster        Germany
+Hoch            X-Prime         Hoch X-Prime            Germany
+```
 
 The above relation <u>does not</u> satisfy 2NF because:
 - {Manufacturer country} is functionally dependent on {Manufacturer}
@@ -330,14 +360,69 @@ relation is not in 2NF because of the other candidate keys. {Manufacturer,
 Model} is also a candidate key, and Manufacturer country is dependent on a
 proper subset of it: Manufacturer.
 
-![table4](assets/table4.jpg)
+```
+Electric toothbrush manufacturers
+-----------------------------------
+Manufacturer    ManufacturerCountry
+------------    -------------------
+Forte           Italy
+Dent-o-Fresh    USA
+Brushmaster     USA
+Kobayashi       Japan
+Hoch            Germany
+
+
+Electric toothbrush models
+----------------------------------------------
+Manufacturer    Model           ModuleFullName
+------------    -----           --------------
+Forte           X-Prime         Forte X-Prime
+Forte           Ultraclean      Forte Ultraclean
+Dent-o-Fresh    EZbrush         Dent-o-Fresh EZbrush
+Brushmaster     SuperBrush      Brushmaster SuperBrush
+Kobayashi       ST-60           Kobayashi ST-60
+Hoch            Toothmaster     Hoch Toothmaster
+Hoch            X-Prime         Hoch X-Prime
+```
+
+
 To make the design conform to 2NF, it is necessary to have two relations
 
 Table is in Third Normal Form if:
 1. Table is already in Second Normal Form
 2. There is no other non-key attribute that you would need to change in a table if you changed a non-key attribute (**Transitive Dependency**). In other words, 3NF doesn't have Transitive Dependency.
+```
+Customer Table
+------------------------------------------------
+CustomerID  FirstName   LastName    CustomerType
+----------  ---------   --------    ------------
+1           Kurt        Heinz       None-Repeat
+2           Michael     Toner       None-Repeat
+3           James       Salas       Repeat
+4           Felicia     Reed        Repeat
 
-![image4](assets/image4.jpg)
+
+Book Table
+-----------------------------------------------------------------------
+BookID  BookTitle                           PublisherID RecentPublisher
+------  ---------                           ----------- ---------------
+1       Think And Grow Rich                 1           The Ralston Society
+2       The Power of Now                    2           New World Library
+3       The Selfish Gene                    3           Oxford University
+4       Astrophysics for People in a Hurry  4           W. W. Norton
+
+
+Customer Rating Table
+--------------------------
+CustomerID  BookID  Rating
+----------  ------  ------
+1           1       5
+2           2       5
+3           3       4
+4           4       4
+3           2       4
+4           2       3
+```
 
 In the above table {PublisherID} and {RecentPublisher} are both dependent to {BookID} i.e. they are "Functionally dependent" (which is good). But they also
 are dependent to each other so, if we want to change {PublisherID} then we
@@ -346,8 +431,48 @@ have to change {RecentPublisher} because they are "Transitive dependent".
 In order to fix that, we change the tables into the tables bellow. We separate
 publishers' info into Publisher Table.
 
-![image5](assets/image5.jpg)
+```
+Customer Table
+------------------------------------------------
+CustomerID  FirstName   LastName    CustomerType
+----------  ---------   --------    ------------
+1           Kurt        Heinz       None-Repeat
+2           Michael     Toner       None-Repeat
+3           James       Salas       Repeat
+4           Felicia     Reed        Repeat
 
+
+Publisher Table
+---------------------------
+PublisherID RecentPublisher
+----------- ---------------
+1           The Ralston Society
+2           New World Library
+3           Oxford University Press
+4           W. W. Norton & Company
+
+
+Book Table
+-------------------------------------------------------
+BookID  BookTitle                           PublisherID
+------  ---------                           -----------
+1       Think And Grow Rich                 1          
+2       The Power of Now                    2          
+3       The Selfish Gene                    3          
+4       Astrophysics for People in a Hurry  4          
+
+
+Customer Rating Table
+--------------------------
+CustomerID  BookID  Rating
+----------  ------  ------
+1           1       5
+2           2       5
+3           3       4
+4           4       4
+3           2       4
+4           2       3
+```
 
 <br>
 <br>
@@ -620,7 +745,30 @@ There are four types of joining along with a feature of Self-Joining:
 
 ![image6](assets/image6.jpg)
 
-![image7](assets/image7.jpg)
+```
+Customer
+------------------------------------------
+CustomerID  FirstName   LastName    Gender
+----------  ---------   --------    ------
+1           Andy        Morrison    Male
+2           Virginia    Reeder      Female
+3           Bruce       Laster      Male
+4           Ruth        Sands       Female
+5           Michael     Villarreal  Male
+
+
+Customer Order
+--------------------------
+CustomerOrderID CustomerID
+--------------- ----------
+1               1
+2               1
+3               2
+4               3
+5               3
+6               10
+7               11
+```
 
 
 The result of Inner Join is only the matching rows from {Customer} and {CustomerOrder} – anything that doesn't match will be ignored:
@@ -635,9 +783,15 @@ FROM
 JOIN
     dbo.CustomeOrder co ON c.CustomerID = co.CustomerID
 ```
-
-![table5](assets/table5.jpg)
-
+```
+CustomerID  FirstName   LastName    CustomerOrderID
+----------  ---------   --------    ---------------
+1           Andy        Morrison    1
+1           Andy        Morrison    2
+2           Virginia    Reeder      3
+3           Bruce       Laster      4
+3           Bruce       Laster      5
+```
 
 The result of a Left Join is the matching rows from {Customer} and {CustomerOrder} including all the nonmatching rows from {Customer} as well:
 ```sql
@@ -651,9 +805,17 @@ FROM
 LEFT JOIN
     dbo.CustomeOrder co ON c.CustomerID = co.CustomerID
 ```
-
-![table6](assets/table6.jpg)
-
+```
+CustomerID  FirstName   LastName    CustomerOrderID
+----------  ---------   --------    ---------------
+1           Andy        Morrison    1
+1           Andy        Morrison    2
+2           Virginia    Reeder      3
+3           Bruce       Laster      4
+3           Bruce       Laster      5
+4           Ruth        Sands       NULL
+5           Michael     Villarreal  NULL
+```
 
 The result of a Right Join is the matching rows from {Customer} and {CustomerOrder} including all the nonmatching rows from {CustomerOrder} as well:
 ```sql
@@ -667,9 +829,17 @@ FROM
 RIGHT JOIN
     dbo.CustomeOrder co ON c.CustomerID = co.CustomerID
 ```
-
-![table7](assets/table7.jpg)
-
+```
+CustomerID  FirstName   LastName    CustomerOrderID
+----------  ---------   --------    ---------------
+1           Andy        Morrison    1
+1           Andy        Morrison    2
+2           Virginia    Reeder      3
+3           Bruce       Laster      4
+3           Bruce       Laster      5
+NULL        NULL        NULL        6
+NULL        NULL        NULL        7
+```
 
 Self-Joining is a technique which we're able to join same table with itself and to do that we can use any one of our joins.
 ```sql
@@ -681,9 +851,19 @@ FROM
 INNER JOIN
     Employee m ON e. ManagerID = m.EmployeeID
 ```
-
-![table8](assets/table8.jpg)
-
+```
+CustomerID  FirstName   LastName    CustomerOrderID
+----------  ---------   --------    ---------------
+1           Andy        Morrison    1
+1           Andy        Morrison    2
+2           Virginia    Reeder      3
+3           Bruce       Laster      4
+3           Bruce       Laster      5
+4           Ruth        Sands       NULL
+5           Michael     Villarreal  NULL
+NULL        NULL        NULL        6
+NULL        NULL        NULL        7
+```
 
 
 ### Distinct Data
