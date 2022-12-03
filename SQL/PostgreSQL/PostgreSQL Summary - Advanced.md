@@ -1,41 +1,20 @@
 <img src="assets/postgresql-logo.svg" width="250" height="250">
 
-# PostgreSQL Summary (Advanced)
+# PostgreSQL Summary (Advanced) <!-- omit from toc -->
 
-## Table of contents
+## Table of contents <!-- omit from toc -->
 
-1. [Subqueries and CTEs](#section1-subqueries-and-ctes)
-
-2. [Window Functions]()
-
-3. [Advanced JOIN Operations]()
-
-4. [Set Operations]()
-
-5. [Grouping Sets]()
-
-6. [Schema Structures and Table Relationships]()
-
-7. [Transactions]()
-
-8. [Table Inheritance and Partioning]()
-
-9. [Views]()
-
-10. [SQL Functions]()
-
-11. [Stored Procedures]()
-
-12. [Triggers]()
-
-13. [Useful Methods and Tools]()
+- [1. Subqueries and CTEs](#1-subqueries-and-ctes)
+  - [1.1. Subqueries](#11-subqueries)
+  - [1.2. Common Table Expressions](#12-common-table-expressions)
+  - [1.3. Subqueries for Comparisons](#13-subqueries-for-comparisons)
 
 
 <br>
 <br>
 
 ****************
-## Section1: Subqueries and CTEs
+## 1. Subqueries and CTEs
 
 Different flavours of subqueries:
 - Basic subquery - FROM clause
@@ -43,7 +22,7 @@ Different flavours of subqueries:
 - Comparisons with main data set
 
 
-### Subqueries
+### 1.1. Subqueries
 - Subqueries in `FROM` clauses
 It's basically a `SELECT` statement inside a `SELECT` statement.
 ```sql
@@ -81,7 +60,7 @@ INNER JOIN (
     ) p ON  SE.master_patient_id = P.master_patient_id;
 ```
 
-### Common Table Expressions
+### 1.2. Common Table Expressions
 Common table expressions (CTEs) provide a way to break down complex queries and make them easier to understand. CTEs create tables that only exist for a single query and can be re-used in a single query. They are good for performing complex, multi-step calculations.
 
 CTEs are identified by a `WITH` clause and they can be used with `CREATE`, `SELECT`, `UPDATE`, and `DELETE` operations:
@@ -127,4 +106,4 @@ INNER JOIN county_patients p ON
 GROUP BY p.county
 ```
 
-### Subqueries for Comparisons
+### 1.3. Subqueries for Comparisons
