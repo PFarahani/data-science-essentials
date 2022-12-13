@@ -8,6 +8,8 @@
   - [1.1. Subqueries](#11-subqueries)
   - [1.2. Common Table Expressions](#12-common-table-expressions)
   - [1.3. Subqueries for Comparisons](#13-subqueries-for-comparisons)
+  - [1.4. Recursive CTEs](#14-recursive-ctes)
+- [2. Window functions](#2-window-functions)
 
 
 <br>
@@ -106,4 +108,185 @@ INNER JOIN county_patients p ON
 GROUP BY p.county
 ```
 
+
 ### 1.3. Subqueries for Comparisons
+Subqueries can also beused in `WHERE` and `HAVING` caluses which are useful for writing comparisons against values that are dynamic or unknown.
+They can be used with most comparison operators of interest: `>`, `>=`, `<`, `<=`, `!=`, `<>`, `LIKE`, etc.
+
+```sql
+WITH total_cost AS (
+    SELECT
+        surgery_id,
+        SUM(resource_cost) AS total_surgery_cost
+    FROM surgical_costs
+    GROUP BY surgery_id
+    )
+
+SELECT *
+FROM total_cost
+WHERE total_surgery_cost > (
+    SELECT AVG(total_surgery_cost)
+    FROM total_cost
+);
+```
+```sql
+SELECT *
+FROM vitals
+WHERE
+    bp_diastolic > (SELECT MIN(bp_diastolic) FROM vitals)
+    AND bp_systolic < (SELECT MAX(bp_systolic) FROM vitals)
+;
+```
+
+Subqueries can be useful for comparing sets of values using `IN` and `NOT IN` where set is not known beforehand.
+```sql
+SELECT *
+FROM patients
+WHERE master_patient_id IN (
+    SELECT DISTINCT master_patient_id FROM surgical_encounters
+)
+ORDER BY master_patient_id;
+```
+
+**Note:** Subqueries with `IN` and `NOT IN` can often be written as joins, depending on performance.
+```sql
+SELECT DISTINCT p.master_patient_id
+FROM patients p
+INNER JOIN surgical_encounters s
+    ON p.master_patient_id = s.master_patient_id
+ORDER BY p.master_patient_id;
+```
+
+`ANY` or `ALL` must be preceded by an operator (`>`, `>=`, `<`, `<=`, `=`, `!=`, `<>`, `LIKE`, …) and can be used in `WHERE` or `HAVING` clauses.
+
+| Clause   | Equivalent to |
+| -------- | ------------- |
+| `SOME`   | `ANY`         |
+| `IN`     | `ANY`         |
+| `NOT IN` | `<> ALL`      |
+
+**Note:** If there's no successes/True values for comparison and at least one null evaluation for operator, the result will be null.
+```sql
+SELECT *
+FROM surgical_encounters
+WHERE total_profit > ALL (
+    SELECT AVG(total_cost)
+    FROM surgical_encounters
+    GROUP BY diagnosis_description
+);
+```
+```sql
+SELECT
+    diagnosis_description,
+    AVG(surgical_discharge_date - surgical_admission_date)
+        AS length_of_stay
+FROM surgical_encounters
+GROUP BY diagnosis_description
+HAVING AVG(surgical_discharge_date - surgical_admission_date) <=
+    ALL(
+        SELECT
+            AVG(EXTRACT(DAY FROM patient_discharge_datetime - patient_admission_datetime))
+        FROM encounters
+        GROUP BY department_id
+    );
+```
+
+`EXISTS` is used to see whether a subquery returns any results. It is used with `WHERE` clause. Subqueries with `EXISTS` can sometimes be inefficient and have poor performance.
+
+**Note:** When subquery returns null, result of `EXISTS` evaluates to True.
+```sql
+SELECT p.*
+FROM patients p
+WHERE NOT EXISTS(
+    SELECT 1
+    FROM surgical_encounters s
+    WHERE s.master_patient_id = p.master_patient_id
+);
+```
+
+### 1.4. Recursive CTEs
+Recursion involves a function or process referring to itself.
+Recursive CTEs in Postgres provide a powerful tool for constructing or analyzing network- or tree-like relationships.
+Start with a non-recursive base term in `WITH` clause and add `RECURSIVE` keyword
+so that postgres understands that we're going to construct a recursive query.
+
+```sql 
+WITH RECURSIVE orders AS (
+
+    SELECT
+        ORDER_PROCEDURE_ID,
+        ORDER_PARENT_ORDER_ID,
+        0 AS LEVEL  -- This is going to be base level
+    FROM orders_procedures
+    WHERE order_parent_order_id IS null
+    UNION ALL
+    SELECT
+        op.orders_procedure_id,
+        op.order_parent_order_id,
+        o.level +1 AS Level
+    FROM orders_procedures op
+    INNER JOIN orders o ON op.order_parent_order_id = o.order_parent_order_id
+)
+SELECT *
+FROM orders;
+```
+
+
+
+## 2. Window functions
+Window functions have two categories/uses:
+- Aggregating data by group within data
+- Performing dynamic calculations on data within groups
+
+In order to use window we must use `OVER` clause. The contents of the `OVER` clause determine how Postgres divides and sorts data for window function calculations.
+`OVER()` with no additional arguments applies window function to entire selection.
+
+- `PARTITION BY` clause determines how data is grouped.
+
+**Note:** Window functions are executed after all other filters, aggeregations, etc and they're **not** allowed in `WHERE`, `HAVING`, or `GROUP BY` clauses.
+
+```sql
+WITH surgical_los AS (
+    SELECT
+        surgery_id,
+        (surgical_discharge_date - surgical_admission_date) AS los,
+        AVG(surgical_discharge_date - surgical_admission_date)
+            OVER(PARTITION BY primary_icd
+                ORDER BY total_account_balance DESC) AS avg_los
+    FROM surgical_encounters
+    )
+SELECT
+    *,
+    ROUND(los - avg_los,2) AS over_under
+FROM surgical_los;    
+```
+
+`WINDOW` clause enables re-use the same window for multiple calculations.
+Notice that it must be defined **after** the `FROM` clause.
+
+```sql
+SELECT
+    s.surgery_id,
+    p.full_name,
+    s.total_profit,
+    AVG(total_profit) OVER w AS avg_total_profit,
+    s.total_cost,
+    SUM(total_cost) OVER w AS total_surgeon_cost
+FROM surgical_encounters s
+LEFT OUTER JOIN physicians p
+    ON s.surgeon_id = p.id
+WINDOW w AS (PARTITION BY s.surgeon_id)
+```
+
+| Function       | Description                                                                                                                                                                                                                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AVG()`        | Average over the window function                                                                                                                                                                                                                                                                                                   |
+| `SUM()`        | Summation over the window function                                                                                                                                                                                                                                                                                                 |
+| `STRING_AGG()` | Concatenation of the strings over the window function                                                                                                                                                                                                                                                                              |
+| `RANK()`       | Returns the rank of the current row, with gaps; that is, the row_number of the first row in its peer group.                                                                                                                                                                                                                        |
+| `DENSE_RANK()` | Returns the rank of the current row, <u>without gaps</u>; this function effectively counts peer groups.                                                                                                                                                                                                                            |
+| `ROW_NUMBER()` | Returns the number of the current row within its partition, counting from 1.                                                                                                                                                                                                                                                       |
+| `LAG()`        | Returns value evaluated at the row that is offset rows before the current row within the partition; if there is no such row, instead returns default (which must be of a type compatible with value). Both offset and default are evaluated with respect to the current row. If omitted, offset defaults to 1 and default to NULL. |
+| `LEAD()`       | Returns value evaluated at the row that is offset rows after the current row within the partition; if there is no such row, instead returns default (which must be of a type compatible with value). Both offset and default are evaluated with respect to the current row. If omitted, offset defaults to 1 and default to NULL.  |
+
+See the full list: [https://www.postgresql.org/docs/current/functions-window.html](https://www.postgresql.org/docs/current/functions-window.html) 
