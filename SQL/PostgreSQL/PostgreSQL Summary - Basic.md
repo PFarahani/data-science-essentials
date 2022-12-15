@@ -818,6 +818,11 @@ CREATE TABLE table_name(
 );
 ```
 
+|Data Definition Language|Data Manipulation Language|
+|--|--|
+|<table><tr><td>**CREATE**<br><span style="color:lightblue">CREATE DATABASE</span> MyDatabase;<br><br><span style="color:lightblue">CREATE TABLE</span> MyTable (<br>&emsp;id <span style="color:pink">int</span>,<br>&emsp;name <span style="color:pink">varchar</span>(10));<br><br><span style="color:lightblue">CREATE INDEX</span> IndexName<br><span style="color:lightblue">ON</span> TableName(col1);<br></td></tr><tr><td>**ALTER**<br><span style="color:lightblue">ALTER TABLE</span> MyTable<br><span style="color:lightblue">DROP COLUMN</span> col5;<br><br><span style="color:lightblue">ALTER TABLE</span> MyTable<br><span style="color:lightblue">ADD</span> col5 <span style="color:pink">int</span>;<br></td></tr><tr><td>**DROP**<br><span style="color:lightblue">DROP DATABASE</span> MyDatabase;<br><span style="color:lightblue">DROP TABLE</span> MyTable;<br></td></tr></table> | <table><tr><td>**UPDATE**<br><span style="color:lightblue">UPDATE</span> MyTable<br><span style="color:lightblue">SET</span> col1 = 56<br><span style="color:lightblue">WHERE</span> col2 = 'something';<br></td></tr><tr><td>**DELETE**<br><span style="color:lightblue">DELETE FROM</span> MyTable<br><span style="color:lightblue">WHERE</span> col1 = 'something';<br></td></tr><tr><td>**INSERT**<br><span style="color:lightblue">INSERT INTO</span> MyTable (col1, col2)<br><span style="color:lightblue">VALUES</span> ('value1', 'value2');</td></tr><tr><td>**SELECT**<br><span style="color:lightblue">SELECT</span> col1, col2<br><span style="color:lightblue">FROM</span> MyTable;</td></tr></table>
+
+
 <br>
 <br>
 
