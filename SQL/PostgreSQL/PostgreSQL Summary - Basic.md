@@ -420,6 +420,7 @@ Charlie David
 David   Andrew
 ```
 
+**Note:** It's better to use more descriptive self-joins than just using less descriptive aliases like <u>t1</u>, <u>t2</u>
 
 ### 3.5. Using WHERE Clauses for Exclusions
 We can use the `OUTER JOINS` we previously saw along with some `WHERE` clauses to exclude records we don't want. Since we know some JOIN statements will result in null values, we can use this to our advantage.
@@ -904,6 +905,29 @@ The result would be:
 |   B   |  300  |
 |   C   |  190  |
 
+Another example:
+
+| EmployeeID |       Name       |    Title     | Previouse_Title |
+| :--------: | :--------------: | :----------: | :-------------: |
+|    399     |    Jess Ramos    | Sr. Analyst  |  Data Analyst   |
+|    912     |    Megan Lieu    |              |  Data Analyst   |
+|    349     | Christian Wanser | Data Analyst | Product Analyst |
+|    889     |   Mark Freeman   | Head of data | Data Scientist  |
+|    623     |  Matthew Blasa   |              |                 |
+
+```sql
+SELECT EmployeeID, Name, Title, Previouse_Title,
+    COALESCE(Title, Previouse_Title, 'Unknown') AS Title_Recoded
+From EmployeesTable
+```
+
+| EmployeeID |       Name       |    Title     | Previouse_Title | Title_Recoded |
+| :--------: | :--------------: | :----------: | :-------------: | :-----------: |
+|    399     |    Jess Ramos    | Sr. Analyst  |  Data Analyst   |  Sr. Analyst  |
+|    912     |    Megan Lieu    |              |  Data Analyst   | Data Analyst  |
+|    349     | Christian Wanser | Data Analyst | Product Analyst | Data Analyst  |
+|    889     |   Mark Freeman   | Head of data | Data Scientist  | Head of Data  |
+|    623     |  Matthew Blasa   |              |                 |    Unknown    |
 
 
 ### 6.3. CAST
