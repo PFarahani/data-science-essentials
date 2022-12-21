@@ -771,7 +771,7 @@ RETURNING account_id, last_login
 ```
 
 ### 5.6. DELETE
-We can use the `DELETE` clause toremove rows from a table:
+We can use the `DELETE` clause to remove rows from a table:
 ```sql
 DELETE FROM table_name
 WHERE condition
