@@ -10,6 +10,10 @@
   - [1.3. Subqueries for Comparisons](#13-subqueries-for-comparisons)
   - [1.4. Recursive CTEs](#14-recursive-ctes)
 - [2. Window functions](#2-window-functions)
+- [3. Advanced JOIN Operations](#3-advanced-join-operations)
+  - [3.1. Cross Join](#31-cross-join)
+  - [3.2. Full Join](#32-full-join)
+  - [3.3. USING and Natural Joins](#33-using-and-natural-joins)
 
 
 <br>
@@ -290,3 +294,110 @@ WINDOW w AS (PARTITION BY s.surgeon_id)
 | `LEAD()`       | Returns value evaluated at the row that is offset rows after the current row within the partition; if there is no such row, instead returns default (which must be of a type compatible with value). Both offset and default are evaluated with respect to the current row. If omitted, offset defaults to 1 and default to NULL.  |
 
 See the full list: [https://www.postgresql.org/docs/current/functions-window.html](https://www.postgresql.org/docs/current/functions-window.html) 
+
+
+<br>
+<br>
+
+****************
+## 3. Advanced JOIN Operations 
+
+### 3.1. Cross Join
+A cross join generates all combinations of the rows of table 1 and the rows of table 2.
+It's useful for generating all combinations of instances.
+
+Imagine we have these two tables:
+```
+Table 1 - t1
+col_1   col_2
+-----   -----
+a       b
+a       c
+
+Table 2 - t2
+col_1   col_2
+-----   -----
+1       2
+1       3
+```
+
+You can cross join the two tables using either of the two syntaxes below:
+```sql
+SELECT
+    t1.col_1,
+    t2.col_1
+FROM table_1 t1
+CROSS JOIN table_2 t2
+```
+Or
+```sql
+SELECT
+    t1.col_1,
+    t2.col_1
+FROM table_1 t1, table_2 t2
+```
+
+The result of `CROSS JOIN` would be the following:
+
+```
+t1.col_1    t1.col_2    t2.col_1    t2.col_2
+--------    --------    --------    --------
+a           b           1           2
+a           c           1           3
+a           b           1           2
+a           c           1           3
+```
+
+### 3.2. Full Join
+A `FULL JOIN` is a combination of a `LEFT JOIN` and `RIGHT JOIN` and it returns records that are in:
+1. Both tables
+2. Table 1, but not Table 2
+3. Table 2, but not Table 1
+
+```sql
+SELECT
+    t1.column_1,
+	t2.column_1
+FROM table_1 t1
+FULL JOIN table_2 t2
+	ON t1.column_1 = t2.column_1
+WHERE t2.column_1 IS NULL
+```
+
+**Examples of use cases:**
+
+- Find orders without visits and/or visits without orders
+- Find employees without departments and/or departments without employees
+- Useful for finding data quality issues. For example: `NOT NULL` condition not being enforced
+
+
+
+### 3.3. USING and Natural Joins
+Databases will often have columns with the same name in multiple tables.
+`NATURAL JOIN` and `USING` let us take advantage of this for our join conditions.
+
+```sql
+SELECT
+	t1.column_1,
+	t2.column_1
+FROM table_1 t1
+INNER JOIN table_2 t2 
+USING (column_1, column_2)  -- This specifies which columns are the same in both tables
+```
+
+```sql
+SELECT
+	t1.column_1,
+	t2.column_1
+FROM table_1 t1
+NATURAL JOIN table_2 t2
+```
+`NATURAL JOIN` includes all common column names between tables and acts like an implicit `USING` clause. (`INNER JOIN` by default)
+
+**Note:** If the two tables have no common columns, `NATURAL JOIN` = `CROSS JOIN`. Therefore, it's usually better to use `USING`.
+
+
+<br>
+<br>
+
+****************
