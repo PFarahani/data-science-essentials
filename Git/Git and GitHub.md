@@ -21,6 +21,10 @@
 - [4. Comparing Changes](#4-comparing-changes)
   - [4.1. Comparisons with Git Diff](#41-comparisons-with-git-diff)
   - [4.2. Chunk Header](#42-chunk-header)
+- [5. Stashing](#5-stashing)
+  - [5.1. Git Stash](#51-git-stash)
+  - [5.2. Applying Specific Stashes](#52-applying-specific-stashes)
+  - [5.3. Clearing the Stash](#53-clearing-the-stash)
 
 
 <br>
@@ -287,3 +291,97 @@ Example:
 `@@ -3,4 +3,5 @@`
 
 From file a, 4 lines are extracted starting from line 3. From file b, 5 lines are extracted starting from line 3.
+
+
+<br>
+<br>
+
+****************
+## 5. Stashing
+
+Imagine you're on master branch and you make new branch and switch to it. You do some new work, but don't make any commits. When you switch back to master:
+1. Your changes come with you to the destination branch
+2. Git won't let you switch if it detects potential conflicts
+
+Git provides an easy way of stashing these uncommitted changes so that we can return to them later, without having to make unnecessary commits.
+
+### 5.1. Git Stash
+
+`git stash` is super useful command that helps you save changes that you are not yet ready to commit. You can stash changes and then come back to them later.
+
+Running `git stash` will take all uncommitted changes (staged and unstaged) and stash them, reverting the changes in your working copy.
+
+![image5](assets/image5.png)
+
+```bash
+git stash
+```
+**Note:** You can also use `git stash save` instead.
+
+![image6](assets/image6.png)
+
+Use `git stash pop` to remove the most recently stashed changes in your stash and re-apply them to your working copy.
+
+```bash
+git stash pop
+```
+
+You can use `git stash apply` to apply whatever is stashed away, without removing it from the stash. This can be useful if you want to apply stashed changes to multiple branches.
+
+```bash
+git stash apply
+```
+
+![image7](assets/image7.png)
+
+
+If you have untracked files (files that you have never checked in to Git), they will not be included in the stash.
+
+Fortunately, you can use the `-u` option to tell git stash to include those untracked files.
+
+```bash
+git stash -u
+```
+
+You can add multiple stashes onto the stack of stashes.  They will all be stashed in the order you added them.
+
+```bash
+git stash
+# do some other stuff ...
+git stash
+# do some other stuff ...
+git stash
+```
+
+**Note:** Run `git stash list` to view all stashes
+
+```bash
+git stash list
+
+# stash@{0}: WIP on master: 049d078 Create index file
+# stash@{1}: WIP on master: c264051 Revert "Add file_size"
+# stash@{2}: WIP on master: 21d80a5 Add number to log
+```
+
+### 5.2. Applying Specific Stashes
+
+Git assumes you want to apply the most recent stash when you run `git stash apply`, but you can also specify a particular stash like `git stash apply stash@{2}`
+
+To delete a particular stash, you can use `git stash drop <stash-id>`
+
+```bash
+git stash drop stash@{2}
+```
+
+### 5.3. Clearing the Stash
+
+To clear out all stashes, run `git stash clear`
+```bash
+git stash clear
+```
+
+
+<br>
+<br>
+
+****************
