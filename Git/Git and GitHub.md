@@ -25,6 +25,11 @@
   - [5.1. Git Stash](#51-git-stash)
   - [5.2. Applying Specific Stashes](#52-applying-specific-stashes)
   - [5.3. Clearing the Stash](#53-clearing-the-stash)
+- [6. Undoing Changes](#6-undoing-changes)
+  - [6.1. Checkout](#61-checkout)
+  - [6.2. Restore](#62-restore)
+  - [6.3. Git Reset](#63-git-reset)
+  - [6.4. Git Revert](#64-git-revert)
 
 
 <br>
@@ -234,14 +239,16 @@ git merge "specific-branch-name"
 > What if we add a commit on master?
 > 
 > This happens all the time! Imagine one of your teammates merged in a new feature or change to master while you were working on a branch
-![image2](assets/image2.png)
+> 
+> ![image2](assets/image2.png)
 
 
 > What happens when I try to merge?
 > 
 > Rather than performing a simple fast forward, git performs a "merge commit" We end up with a new commit on the master branch. Git will prompt you for a message.
-![image3](assets/image3.png)
-![image4](assets/image4.png)
+> 
+> ![image3](assets/image3.png)
+> ![image4](assets/image4.png)
 
 
 **Whenever you encounter merge conflicts, follow these steps to resolve them:**
@@ -385,3 +392,106 @@ git stash clear
 <br>
 
 ****************
+## 6. Undoing Changes
+
+### 6.1. Checkout
+We can use `git checkout` to create branches, switch to new branches, restore files, and undo history!
+
+```bash
+git checkout <commit-hash>
+```
+**Note:** You can use the `git log` command to view commit hashes. We just need the first 7 digits of a commit hash.
+
+> **Example:**
+>
+> Suppose you want to go back to an old commit and make some new changes. With `git checkout <commit-hash>` you'll be in a detached HEAD state.
+>
+> ![image8](assets/image8.png)
+>
+> ```bash
+> git checkout d8194d6
+> ```
+>
+> ![image9](assets/image9.png)
+> 
+> While in detached HEAD, make a new branch and switch to it. Head is now back to pointing at a branch reference!
+> 
+> ```bash
+> git switch -c newbranch
+> ```
+> 
+> ![image10](assets/image9.png)
+>
+> Now on the new branch, make as many new commits as you want.
+>
+> ```bash
+> git add .
+> git commit -m "new commit"
+> ````
+>
+> ![image11](assets/image10.png)
+
+To reference previous commits using `git checkout` use the syntax below:
+
+```bash
+git checkout HEAD~1 # refers to the commit before HEAD (parent)
+git checkout HEAD~2 # refers to 2 commit before HEAD (grandparent)
+```
+
+To discard any changes in that file, reverting back to the HEAD, you can use:
+```bash
+git checkout HEAD <filename>
+```
+
+There's another shorter option to revert a file:
+```bash
+git checkout -- <file>
+```
+
+Rather than typing HEAD, you can substitute `--` followed by the file(s) you want to restore.
+
+
+### 6.2. Restore
+`git restore` is a brand new Git command that helps with undoing operations.   
+
+Suppose you've made some changes to a file since your last commit. You've saved the file but then realize you definitely do NOT want those changes anymore!
+To restore the file to the contents in the HEAD: 
+```bash
+git restore <file-name>
+```
+
+**Note:** The above command is not "undoable". If you have uncommited changes in the file, they will be lost!
+
+`git restore <file-name>` restores using HEAD as the default source, but we can change that using the `--source` option.
+
+For example, `git restore --source HEAD~1 home.html` will restore the contents of home.html to its state from the commit prior to HEAD.  You can also use a particular commit hash as the source.
+
+If you have accidentally added a file to your staging area with `git add` and you don't wish to include it in the next commit, you can use `git restore` to remove it from staging.
+
+```bash
+git restore --staged <file-name>
+```
+
+### 6.3. Git Reset
+Suppose you've just made a couple of commits on the master branch, but you actually meant to make them on a separate branch instead.  To undo those commits, you can use git reset.
+```bash
+git reset <commit-hash>
+```
+
+`git reset <commit-hash>` will reset the repo back to a specific commit.  The commits are gone.
+
+
+### 6.4. Git Revert
+`git revert` is similar to `git reset` in that they both "undo" changes, but they accomplish it in different ways.
+
+`git reset` actually moves the branch pointer backwards, eliminating commits.
+
+`git revert` instead creates a brand new commit which reverses/undos the changes from a commit. Because it results in a new commit, you will be prompted to enter a commit message.
+```bash
+git revert <commit-hash>
+```
+**Note:** If you want to reverse some commits that other people already have on their machines, you should use `git revert`. If you want to reverse commits that you haven't shared with others, use `git reset` and no one will ever know!
+
+![image12](assets/image12.png)
+
+![image13](assets/image13.png)
