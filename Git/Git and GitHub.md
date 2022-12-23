@@ -494,4 +494,20 @@ git revert <commit-hash>
 
 ![image12](assets/image12.png)
 
+```bash
+git reset HEAD~2
+```
+
 ![image13](assets/image13.png)
+
+The branch pointer is moved back to an earlier commit, erasing the 2 later commits.
+
+![image12](assets/image12.png)
+
+```bash
+git revert 51494a6
+```
+
+![image14](assets/image14.png)
+
+This new commit reverses the changes from 51494a6.
