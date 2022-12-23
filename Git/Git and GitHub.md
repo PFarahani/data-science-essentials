@@ -490,24 +490,24 @@ git reset <commit-hash>
 ```bash
 git revert <commit-hash>
 ```
-**Note:** If you want to reverse some commits that other people already have on their machines, you should use `git revert`. If you want to reverse commits that you haven't shared with others, use `git reset` and no one will ever know!
-
-![image12](assets/image12.png)
-
-```bash
-git reset HEAD~2
-```
-
-![image13](assets/image13.png)
-
-The branch pointer is moved back to an earlier commit, erasing the 2 later commits.
-
-![image12](assets/image12.png)
-
-```bash
-git revert 51494a6
-```
-
-![image14](assets/image14.png)
-
-This new commit reverses the changes from 51494a6.
+> **Note:** If you want to reverse some commits that other people already have on their machines, you should use `git revert`. If you want to reverse commits that you haven't shared with others, use `git reset` and no one will ever know!
+>
+> ![image12](assets/image12.png)
+>
+> ```bash
+> git reset HEAD~2
+> ```
+>
+> ![image13](assets/image13.png)
+>
+> The branch pointer is moved back to an earlier commit, erasing the 2 later commits.
+>
+> ![image12](assets/image12.png)
+>
+> ```bash
+> git revert 51494a6
+> ```
+>
+> ![image14](assets/image14.png)
+>
+> This new commit reverses the changes from 51494a6.
