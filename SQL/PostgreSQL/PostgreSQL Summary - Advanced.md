@@ -9,11 +9,15 @@
   - [1.2. Common Table Expressions](#12-common-table-expressions)
   - [1.3. Subqueries for Comparisons](#13-subqueries-for-comparisons)
   - [1.4. Recursive CTEs](#14-recursive-ctes)
-- [2. Window functions](#2-window-functions)
+- [2. Window Functions](#2-window-functions)
 - [3. Advanced JOIN Operations](#3-advanced-join-operations)
   - [3.1. Cross Join](#31-cross-join)
   - [3.2. Full Join](#32-full-join)
   - [3.3. USING and Natural Joins](#33-using-and-natural-joins)
+- [4. Set Operations](#4-set-operations)
+  - [4.1. Union](#41-union)
+  - [4.2. Intersect](#42-intersect)
+  - [4.3. Except](#43-except)
 
 
 <br>
@@ -236,8 +240,11 @@ FROM orders;
 ```
 
 
+<br>
+<br>
 
-## 2. Window functions
+****************
+## 2. Window Functions
 Window functions have two categories/uses:
 - Aggregating data by group within data
 - Performing dynamic calculations on data within groups
@@ -303,8 +310,7 @@ See the full list: [https://www.postgresql.org/docs/current/functions-window.htm
 ## 3. Advanced JOIN Operations 
 
 ### 3.1. Cross Join
-A cross join generates all combinations of the rows of table 1 and the rows of table 2.
-It's useful for generating all combinations of instances.
+A cross join generates all combinations of the rows of table 1 and the rows of table 2. It's useful for generating all combinations of instances.
 
 Imagine we have these two tables:
 ```
@@ -401,3 +407,50 @@ NATURAL JOIN table_2 t2
 <br>
 
 ****************
+## 4. Set Operations
+
+### 4.1. Union
+`UNION` adds the result of one query to the result of another query.
+- Both queries must have the same number of columns
+- Columns must have the same or similar data types
+- Duplicate values <u>will be removed</u> unless `UNION ALL` is used
+
+```sql
+SELECT
+	column_1
+FROM table_1
+UNION
+SELECT
+	column_1
+FROM table_2
+```
+
+### 4.2. Intersect
+`INTERSECT` returns rows that are in the result of both query 1 and query 2.
+- Queries must have the same number of columns and convertible data types
+- Duplicate values will be removed unless `INTERSECT ALL` is used
+
+```sql
+SELECT
+	column_1
+FROM table_1
+INTERSECT
+SELECT
+	column_1
+FROM table_2
+```
+
+### 4.3. Except
+`EXCEPT` returns rows that are in the result of query 1 but not query 2.
+- Queries must have the same number of columns and convertible data types
+- Duplicate values will be removed unless `EXCEPT ALL` is used
+
+```sql
+SELECT
+	column_1
+FROM table_1
+EXCEPT
+SELECT
+	column_1
+FROM table_2
+```
