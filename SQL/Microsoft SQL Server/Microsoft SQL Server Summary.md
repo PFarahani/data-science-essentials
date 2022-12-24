@@ -1,48 +1,43 @@
 <img src="assets/microsoft-sql-server-logo.svg" width="250" height="250">
 
-# Microsoft SQL Server Summary
 
-## Table of Contents
-1. [How is Data Stored in SQL Server](#section-1-how-is-data-stored-in-sql-server)
-    - [Simple Hierarchy & Structure](#simple-hierarchy--structure)
-    - [Why Relational](#why-relational)
-    - [Indexes](#indexes)
+# Microsoft SQL Server Summary <!-- omit from toc -->
 
-
-2. [DDL in SQL Server](#section-2-ddl-in-sql-server)
-    - [Data Definition Language Commands](#data-definition-language-commands)
-    - [How to Create](#how-to-create)
-    - [How to Modify](#how-to-modify)
-    - [How to Truncate](#how-to-truncate)
-    - [How to Drop](#how-to-drop)
-    - [Normalization](#normalization)
-
-
-3. [DML in SQL Server](#section-3-dml-in-sql-server)
-    - [Data Manipulation Language Commands](#data-manipulation-language-commands)
-    - [Begin with Retrieval](#begin-with-retrieval)
-    - [Scalar Functions](#scalar-functions)
-    - [Sorting](#sorting)
-    - [Column & Row Logic](#column--row-logic)
-    - [Joins](#joins)
-    - [Distinct Data](#distinct-data)
-    - [Aggregate Functions](#aggregate-functions)
-    - [Subqueries](#subqueries)
-    - [Set Operations](#set-operations)
-    - [Manipulate Data](#manipulate-data)
-
-
-4. [DCL in SQL Server](#section-4-dcl-in-sql-server)
-    - [Data Control Language Commands](#data-control-language-commands)
-    - [Grant & Revoke](#grant--revoke)
+## Table of Contents <!-- omit from toc -->
+- [1. How is Data Stored in SQL Server](#1-how-is-data-stored-in-sql-server)
+  - [1.1. Simple Hierarchy \& Structure](#11-simple-hierarchy--structure)
+  - [1.2. Why Relational](#12-why-relational)
+  - [1.3. Indexes](#13-indexes)
+- [2. DDL in SQL Server](#2-ddl-in-sql-server)
+  - [2.1. Data Definition Language Commands](#21-data-definition-language-commands)
+  - [2.2. How to Create](#22-how-to-create)
+  - [2.3. How to Modify](#23-how-to-modify)
+  - [2.4. How to Truncate](#24-how-to-truncate)
+  - [2.5. How to Drop](#25-how-to-drop)
+  - [2.6. Normalization](#26-normalization)
+- [3. DML in SQL Server](#3-dml-in-sql-server)
+  - [3.1. Data Manipulation Language Commands](#31-data-manipulation-language-commands)
+  - [3.2. Begin with Retrieval](#32-begin-with-retrieval)
+  - [3.3. Scalar Functions](#33-scalar-functions)
+  - [3.4. Sorting](#34-sorting)
+  - [3.5. Column \& Row Logic](#35-column--row-logic)
+  - [3.6. Joins](#36-joins)
+  - [3.7. Distinct Data](#37-distinct-data)
+  - [3.8. Aggregate Functions](#38-aggregate-functions)
+  - [3.9. Subqueries](#39-subqueries)
+  - [3.10. Set Operations](#310-set-operations)
+  - [3.11. Manipulate Data](#311-manipulate-data)
+- [4. DCL in SQL Server](#4-dcl-in-sql-server)
+  - [4.1. Data Control Language Commands](#41-data-control-language-commands)
+  - [4.2. Grant \& Revoke](#42-grant--revoke)
 
 <br>
 <br>
 
 ****************
-## Section 1: How is Data Stored in SQL Server
+## 1. How is Data Stored in SQL Server
 
-### Simple Hierarchy & Structure
+### 1.1. Simple Hierarchy & Structure
 At the top level you have a SQL Server "Instance"
 
 Within each instance you can have multiple "Databases"
@@ -63,7 +58,7 @@ All of table data is organized in within 8K data pages
 
 
 
-### Why Relational
+### 1.2. Why Relational
 Some of the available constraints:
 - <span style="color:gray">**NOT NULL**</span> – all columns by default can hold NULL values, but this constraint restricts any NULL values from being inserted into columns.
 - <span style="color:gray">**UNIQUE**</span> – ensures uniqueness for the columns just like "Primary Key" but you can have many `UNIQUE` constraints per table and only one "Primary Key".
@@ -77,7 +72,7 @@ There are three types of relationships in SQL Server or in general relational da
 
 
 
-### Indexes
+### 1.3. Indexes
 When a table doesn't have an index – those 8K data pages are sorted in an unordered structure called a heap.
 
 We have two types of indexes:
@@ -102,9 +97,9 @@ We have two types of indexes:
 <br>
 
 ****************
-## Section 2: DDL in SQL Server
+## 2. DDL in SQL Server
 
-### Data Definition Language Commands
+### 2.1. Data Definition Language Commands
 The main commands are:
 - <span style="color:lightblue">**CREATE**</span> allows you to create a new database or objects in the database.
 - <span style="color:lightblue">**DROP**</span> allows you to delete a whole database or just a database object.
@@ -113,7 +108,7 @@ The main commands are:
 
 
 
-### How to Create
+### 2.2. How to Create
 Create a database:
 ```sql
 CREATE DATABASE OurDatabase
@@ -225,7 +220,7 @@ And *OurSchema2* is assigned to the user named "*guest*"
 
 
 
-### How to Modify
+### 2.3. How to Modify
 Add a column with <span style="color:lightblue">**ALTER TABLE**</span>:
 ```sql
 ALTER TABLE OurSchema.OurTable
@@ -253,7 +248,7 @@ DROP COLUMN NewColumn
 
 
 
-### How to Truncate
+### 2.4. How to Truncate
 Truncate a table:
 ```sql
 TRUNCATE TABLE OurSchema.OurTable
@@ -261,7 +256,7 @@ TRUNCATE TABLE OurSchema.OurTable
 
 
 
-### How to Drop
+### 2.5. How to Drop
 Drop indexes (clustered and non-clustered):
 ```sql
 DROP INDEX OurClusterIndex ON OurSchema.OurTable
@@ -287,7 +282,7 @@ DROP DATABASE OurDatabase
 
 
 
-### Normalization
+### 2.6. Normalization
 Normalization is a database technique where we build and organize the table in such way that it reduces redundancy and dependency of data.
 
 It divides larger tables to smaller ones and uses the relational features of RDBMS to link those tables together.
@@ -478,9 +473,9 @@ CustomerID  BookID  Rating
 <br>
 
 ****************
-## Section 3: DML in SQL Server
+## 3. DML in SQL Server
 
-### Data Manipulation Language Commands
+### 3.1. Data Manipulation Language Commands
 The main commands are:
 - <span style="color:lightblue">**SELECT**</span> allows you to retrieve data from a database
 - <span style="color:lightblue">**INSERT**</span> allows you to insert data into a table
@@ -489,7 +484,7 @@ The main commands are:
 
 **Note:** Main differences between `TRUNCATE` and `DELETE` are that *TRUNCATE* is all or nothing, it is much faster, it resets the *IDENTITY* column and *DELETE* does not.
 
-### Begin with Retrieval
+### 3.2. Begin with Retrieval
 Simple `SELECT` statement that will retrieve everything from the Person table:
 ```sql
 SELECT * FROM Person.Person
@@ -536,7 +531,7 @@ WHERE Middlename IS NOT NULL;
 ```
 
 
-### Scalar Functions
+### 3.3. Scalar Functions
 Scalar function just means that a function is going to be performed on a single column. Main categories of scalar functions:
 - String Functions
 - Date & Time Functions
@@ -642,7 +637,7 @@ Conversion functions allows us to convert from one data type to another and have
 
 
 
-### Sorting
+### 3.4. Sorting
 We have a way of returning our data back sorted:
 ```sql
 SELECT [your_column(s)] FROM [your_table] ORDER BY [your_column(s)]
@@ -659,7 +654,7 @@ ORDER BY FirstName ASC , LastName DESC
 
 
 
-### Column & Row Logic
+### 3.5. Column & Row Logic
 To perform conditional logic on a column(s) we need to use the `CASE` statement with associated reserved keywords.
 
 Column logic allows us to manipulate our columns based on a given condition before we get back the result set.
@@ -735,7 +730,7 @@ Other reserved keys that comes with `WHERE`:
 
 
 
-### Joins
+### 3.6. Joins
 There are four types of joining along with a feature of Self-Joining:
 - <span style="color:grey">**INNER JOIN**</span> (or <span style="color:grey">**JOIN**</span>)
 - <span style="color:grey">**LEFT OUTER JOIN**</span> (or <span style="color:grey">**LEFT JOIN**</span>)
@@ -866,7 +861,7 @@ NULL        NULL        NULL        7
 ```
 
 
-### Distinct Data
+### 3.7. Distinct Data
 Whichever columns you provide in the <span style="color:lightblue">**SELECT DISTINCT**</span> statement will be used to check for uniqueness:
 ```sql
 SELECT DISTINCT [your_column(s)]
@@ -883,7 +878,7 @@ SELECT DISTINCT Gender, JobTitle FROM HumanResources.Employee
 
 
 
-### Aggregate Functions
+### 3.8. Aggregate Functions
 The most commonly used aggregate functions which are pre-defined in SQL for us:
 - <span style="color:pink">**AVG**</span>
 - <span style="color:pink">**MAX**</span>
@@ -941,7 +936,7 @@ HAVING
 
 
 
-### Subqueries
+### 3.9. Subqueries
 A subquery is a `SELECT` statement which is included in another `SELECT`, `INSERT`, `UPDATE`, or `DELETE` statement or in another subquery entirely.
 
 A subquery can be included in any part of the `SELECT` statement except `GROUP BY`
@@ -958,7 +953,7 @@ The only difference is the way it's placed; part of the column list, tables, or 
 
 
 
-### Set Operations
+### 3.10. Set Operations
 Set operations allow us to combine `SELECT` queries together.
 
 Unlike subqueries we are not nesting `SELECT` statements within each other – we have two or more separate `SELECT` queries which get their own results and the via set operations those results get combined.
@@ -1031,7 +1026,7 @@ FROM
 
 
 
-### Manipulate Data
+### 3.11. Manipulate Data
 - <span style="color:lightblue">**INSERT**</span>:
 ```sql
 INSERT INTO [Person].[PhoneNumberType]
@@ -1064,9 +1059,9 @@ WHERE PhoneNumberTypeID = 4
 <br>
 
 ****************
-## Section 4: DCL in SQL Server
+## 4. DCL in SQL Server
 
-### Data Control Language Commands
+### 4.1. Data Control Language Commands
 This part of SQL language is used to enforce database security in a multiple user database environment.
 
 Privileges in SQL Server are access rights given to the database user for a database object. There are two types of privileges:
@@ -1081,7 +1076,7 @@ A role could define a set of privileges for multiple users so that when you chan
 
 
 
-### Grant & Revoke
+### 4.2. Grant & Revoke
 Two main commands are used to accomplish these tasks:
 - <span style="color:lightblue">**GRANT**</span>
 - <span style="color:lightblue">**REVOKE**</span>
