@@ -10,6 +10,7 @@
   - [1.3. Subqueries for Comparisons](#13-subqueries-for-comparisons)
   - [1.4. Recursive CTEs](#14-recursive-ctes)
 - [2. Window Functions](#2-window-functions)
+  - [2.1. Find Duplicates with RANK](#21-find-duplicates-with-rank)
 - [3. Advanced JOIN Operations](#3-advanced-join-operations)
   - [3.1. Cross Join](#31-cross-join)
   - [3.2. Full Join](#32-full-join)
@@ -301,6 +302,83 @@ WINDOW w AS (PARTITION BY s.surgeon_id)
 | `LEAD()`       | Returns value evaluated at the row that is offset rows after the current row within the partition; if there is no such row, instead returns default (which must be of a type compatible with value). Both offset and default are evaluated with respect to the current row. If omitted, offset defaults to 1 and default to NULL.  |
 
 See the full list: [https://www.postgresql.org/docs/current/functions-window.html](https://www.postgresql.org/docs/current/functions-window.html) 
+
+
+### 2.1. Find Duplicates with RANK
+
+Follow the steps below to clean out duplicates using `RANK`:
+1. Check if duplicates exist using `GROUB BY` + `COUNT(*)`
+2. Identify exact rows that are duplicated using `RANK OVER(PARTITION BY cols)`
+   
+   This actually devides the table into multiple partitions, one for each unique value of cols, then assigns a rank from 1 to the number of rows in the partition, then returns more than 1 if the row is duplicated.
+
+**Example:**
+```
+id  show_name   actor_name
+--  ---------   ----------
+1   Office      Dwight
+2   Office      Dwight
+3   Office      Dwight
+4   Family      Prichett
+5   Family      Dunphy
+6   Friends     Rachel
+```
+
+```sql
+/* 1. Find duplicated show_name + actor_name */
+SELECT show_name, actor_name, COUNT(*)
+FROM actor
+GROUP BY show_name, actor_name
+HAVING COUNT(*) > 1
+```
+
+Output:
+```
+show_name   actor_name  count
+---------   ----------  -----
+Office      Dwight      2
+```
+
+```sql
+/* 2. Find row with duplicated show_name */
+SELECT * FROM (
+    SELECT
+        id, show_name,
+        RANK() OVER(
+            PARTITION BY show_name
+            ORDER BY id) rk
+    FROM actor) subquery
+WHERE rk > 1
+ORDER BY id
+```
+
+Output:
+```
+id  show_name   rk
+--  ---------   --
+2   Office      2
+3   Office      3
+5   Family      2
+```
+
+```sql
+/* 2. Find row with duplicated show_name + actor_name */
+SELECT * FROM (
+    SELECT
+        id, show_name,
+        RANK() OVER(
+            PARTITION BY show_name, actor_name
+            ORDER BY id) rk
+    FROM actor) subquery
+WHERE rk > 1
+```
+
+Output:
+```
+id  show_name   rk
+--  ---------   --
+2   Office      2
+```
 
 
 <br>
