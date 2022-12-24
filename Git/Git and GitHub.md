@@ -10,7 +10,7 @@
   - [1.1. Configuring Git](#11-configuring-git)
   - [1.2. Terminal Basic Commands](#12-terminal-basic-commands)
 - [2. The Very Basics of Git](#2-the-very-basics-of-git)
-  - [2.1. First git commands](#21-first-git-commands)
+  - [2.1. First Git Commands](#21-first-git-commands)
   - [2.2. Committing](#22-committing)
   - [2.3. Amending Commits](#23-amending-commits)
   - [2.4. Some Basic Guidelines](#24-some-basic-guidelines)
@@ -30,6 +30,12 @@
   - [6.2. Restore](#62-restore)
   - [6.3. Git Reset](#63-git-reset)
   - [6.4. Git Revert](#64-git-revert)
+- [7. GitHub Basics](#7-github-basics)
+  - [7.1. Cloning](#71-cloning)
+  - [7.2. Configuring SSH keys](#72-configuring-ssh-keys)
+  - [7.3. Get the Codes on GitHub](#73-get-the-codes-on-github)
+  - [7.4. Remote](#74-remote)
+  - [7.5. Pushing](#75-pushing)
 
 
 <br>
@@ -73,7 +79,7 @@ git config --global user.email blah@blah.com
 
 ## 2. The Very Basics of Git
 
-### 2.1. First git commands
+### 2.1. First Git Commands
 
 ```bash
 git status
@@ -511,3 +517,104 @@ git revert <commit-hash>
 > ![image14](assets/image14.png)
 >
 > This new commit reverses the changes from 51494a6.
+
+
+<br>
+<br>
+
+****************
+## 7. GitHub Basics
+
+### 7.1. Cloning
+To get a local copy of an existing repository, we can clone a remote repository hosted on GitHub or similar websites. All we need is a URL that we can tell Git to clone for use.
+```bash
+git clone <url>
+```
+
+Git will retrieve all the files associated with the repository and will copy them to your local machine. In addition, Git initializes a new repository on your machine, giving you access to the full Git history of the cloned project.
+
+**Note:** Make sure you are not inside of a repo when you clone!
+
+### 7.2. Configuring SSH keys
+SSH key allows to be authenticated without having to enter our email and password every time we try to connect to GitHub.
+To generate SSH key we must follow [these steps](https://docs.github.com/en/authentication/connecting-to-github-with-ssh):
+
+**Note:** Before you generate an SSH key, you can check to see if you have any existing SSH keys.
+```bash
+ls -al ~/.ssh
+# Lists the files in your .ssh directory, if they exist
+```
+Check the directory listing to see if you already have a public SSH key. By default, the filenames of supported public keys for GitHub are one of the following.
+- id_rsa.pub
+- id_ecdsa.pub
+- id_ed25519.pub
+
+### 7.3. Get the Codes on GitHub 
+
+**Option 1: Existing Repo**
+
+If you already have an existing repo locally that you want to get on GitHub:
+
+1. Create a new repo on GitHub
+2. Connect your local repo (add a remote)
+3. Push up your changes to GitHub
+
+**Option 2: Start From Scratch**
+
+If you haven't begun work on your local repo, you can:
+
+1. Create a brand new repo on GitHub
+2. Clone it down to your machine
+3. Do some work locally
+4. Push up your changes to GitHub
+
+### 7.4. Remote
+Each remote is simply a URL where a hosted repository lives. To view any existing remotes for you repository, we can run:
+```bash
+git remote
+```
+
+Or adding a `-v` flag for more info
+```bash
+git remote -v
+```
+
+This just displays a list of remotes and if you haven't added any remotes yet, nothing will be shown.
+
+To add a new remote, we need to provide both to Git.
+```bash
+git remote add <name> <url>
+```
+
+There are commands to rename and delete remotes if needed.
+```bash
+git remote rename <old> <new>
+```
+```bash
+git remote remove <name>
+```
+
+### 7.5. Pushing
+We need to specify the remote we want to push up to and the specific local branch we want to push up to that remote.
+```bash
+git push <remote> <branch>
+```
+
+If we want to push a local branch up to a remote branch of a different name, we could do:
+```bash
+git push <remote> <local-branch>:<remote-branch>
+```
+
+
+The `-u` option allows us to set the upstream of the branch we're pushing. You can think of this as a link connecting our local branch to a branch on GitHub. 
+```bash
+git push -u origin master
+```
+
+Running this, sets the upstream of the local master branch so that it tracks the master branch on the origin repo. So next time we can use the `git push` without specifying the \<remote\> and \<branch\> which will push our current branch to the upstream.
+
+
+<br>
+<br>
+
+****************
