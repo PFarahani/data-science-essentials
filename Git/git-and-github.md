@@ -36,6 +36,11 @@
   - [7.3. Get the Codes on GitHub](#73-get-the-codes-on-github)
   - [7.4. Remote](#74-remote)
   - [7.5. Pushing](#75-pushing)
+- [8. Fetch \& Pull](#8-fetch--pull)
+  - [8.1. Remote Branches](#81-remote-branches)
+  - [8.2. Fetching](#82-fetching)
+  - [8.3. Pulling](#83-pulling)
+  - [8.4. Fetch vs Pull](#84-fetch-vs-pull)
 
 
 <br>
@@ -612,6 +617,68 @@ git push -u origin master
 ```
 
 Running this, sets the upstream of the local master branch so that it tracks the master branch on the origin repo. So next time we can use the `git push` without specifying the \<remote\> and \<branch\> which will push our current branch to the upstream.
+
+
+<br>
+<br>
+
+****************
+## 8. Fetch & Pull
+
+### 8.1. Remote Branches
+To view the remote branches our local repository knows about.
+```bash 
+git branch -r
+```
+They follow this pattern `<remote>/<branch>`. 
+
+> `origin/master` references the state of the master branch on the remote repo named origin.
+ 
+Once you've cloned a repository that contains two branches: `master` and `temp`, we have all the data and Git history for the project at that moment in time. However, that does not mean it's all in the workspace! If you run `git branch -r` you'll see all remote branches. By default the `master` is connected to the local `master` branch but `origin/temp` is not available locally.
+
+Run `git switch <remote-branch-name>` to create a new local branch from the remote branch of the same name. So, by running `git switch temp` you'll have a local `temp` branch which is connected to the remote branch `origin/temp`.
+
+**Note:** It used to be slightly more complicated using `git checkout`:
+```bash
+git checkout --track origin/temp
+```
+
+### 8.2. Fetching
+Fetching allows us to download changes from a remote repository, but those changes will not be automatically integrated into our working files. It lets you see what others have been working on, without having to merge those changes into your local repo.
+```bash
+git fetch <remote>
+```
+This command fetches branches and history from a specific remote repository. It only updates remote tracking branches.
+
+**Note:** If not specified, `<remote>` defaults to `origin`
+
+We can also fetch a specific branch from a remote:
+```bash
+git fetch <remote> <branch>
+```
+
+### 8.3. Pulling
+We can use pulling to retrieve changes from a remote repository. Unlike fetch, pull actually updates our HEAD branch with whatever changes are retrieved from the remote.
+```bash
+git pull <remote> <branch>
+```
+
+> `git pull` = `git fetch` + `git merge`
+
+If we run `git pull` without specifying a particular remote or branch to pull from, git assumes the following:
+- remote will default to origin
+- branch will default to whatever tracking connection is configured for your current branch.
+
+**Note:** This behavior can be configured, and tracking connections can be changed manually. Most people dont mess with that stuff
+
+
+### 8.4. Fetch vs Pull
+| `git fetch`                                               | `git pull`                                                       |
+| --------------------------------------------------------- | ---------------------------------------------------------------- |
+| Gets changes from remote branch(es)                       | Gets changes from remote branch(es)                              |
+| Updates the remote-tracking branches with the new changes | Updates the current branch with the new changes, merging them in |
+| Does not merge changes onto your current HEAD branch      | Can result in merge conflicts                                    |
+| Safe to do at anytime                                     | Not recommended if you have uncommitted changes!                 |
 
 
 <br>
