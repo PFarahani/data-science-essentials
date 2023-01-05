@@ -41,6 +41,9 @@
   - [8.2. Fetching](#82-fetching)
   - [8.3. Pulling](#83-pulling)
   - [8.4. Fetch vs Pull](#84-fetch-vs-pull)
+- [9. Rebasing](#9-rebasing)
+  - [9.1. Merging With Rebase](#91-merging-with-rebase)
+  - [9.2. Cleaning Up History](#92-cleaning-up-history)
 
 
 <br>
@@ -679,6 +682,50 @@ If we run `git pull` without specifying a particular remote or branch to pull fr
 | Updates the remote-tracking branches with the new changes | Updates the current branch with the new changes, merging them in |
 | Does not merge changes onto your current HEAD branch      | Can result in merge conflicts                                    |
 | Safe to do at anytime                                     | Not recommended if you have uncommitted changes!                 |
+
+
+<br>
+<br>
+
+****************
+## 9. Rebasing
+
+There are two main ways to use `git rebase` command:
+- as an alternative to merging
+- as a cleanup tool
+
+### 9.1. Merging With Rebase
+Instead of using a merge commit, rebasing rewrites history by <u>creating new commits</u> for each of the original feature branch commits.
+
+```bash
+git switch feature
+
+git rebase master
+```
+
+![image15](assets/image15.png)
+
+**WARNING!**
+
+Never rebase commits that have been shared with others. If you have already pushed commits up to Github...DO NOT rebase them unless you are positive no one on the team is using those commits.
+
+### 9.2. Cleaning Up History
+
+Running `git rebase` with the `-i` option will enter the interactive mode, which allows us to edit commits, add files, drop commits, etc. Note that we need to specify how far back we want to rewrite commits.
+
+Also, notice that we are not rebasing onto another branch. Instead, we are rebasing a series of commits onto the HEAD they currently are based on.
+
+```bash
+git rebase -i HEAD~4
+```
+
+In our text editor, we'll see a list of commits alongside a list of commands that we can choose from. Here are a couple of the more commonly used commands:
+
+- `pick` - use the commit
+- `reword` - use the commit, but edit the commit message
+- `edit` - use commit, but stop for amending
+- `fixup` - use commit contents but meld it into previous commit and discard the commit message
+- `drop` - remove commit
 
 
 <br>
