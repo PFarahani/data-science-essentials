@@ -44,6 +44,13 @@
 - [9. Rebasing](#9-rebasing)
   - [9.1. Merging With Rebase](#91-merging-with-rebase)
   - [9.2. Cleaning Up History](#92-cleaning-up-history)
+- [10. Tags](#10-tags)
+  - [10.1. Leightweight Tags](#101-leightweight-tags)
+  - [10.2. Annotated Tags](#102-annotated-tags)
+  - [10.3. Tagging Previous Commits](#103-tagging-previous-commits)
+  - [10.4. Forcing Tags](#104-forcing-tags)
+  - [10.5. Deleting Tags](#105-deleting-tags)
+  - [10.6. Pushing Tags](#106-pushing-tags)
 
 
 <br>
@@ -726,6 +733,75 @@ In our text editor, we'll see a list of commits alongside a list of commands tha
 - `edit` - use commit, but stop for amending
 - `fixup` - use commit contents but meld it into previous commit and discard the commit message
 - `drop` - remove commit
+
+
+<br>
+<br>
+
+****************
+## 10. Tags
+Once a tag is created, it always refers to the same commit. It's just a label for a commit.
+
+There are two types of Git tags we can use:
+1. lightweight tags - They are just a name/label that points to a particular commit.
+2. annotated tags - store extra meta data including the author's name and email, the date, and a tagging message (like a commit message)
+
+To view the tags we use:
+```bash
+git tag
+```
+
+It will print a list of all the tags in the current repository. We can search for tags that match a particular pattern by using `git tag -l` and then passing in a wildcard pattern. For example, `git tag -l "*beta*"` will print a list of tags that include "beta" in their name.
+
+To view the state of a repo at a particular tag, we can use:
+```bash
+git checkout <tag>
+```
+
+**Note:** This puts us in detached HEAD!
+
+### 10.1. Leightweight Tags
+To create a lightweight tag, use: 
+```bash
+git tag <tagname>   
+```
+
+By default, Git will create the tag referring to the commit that HEAD is referencing.
+
+### 10.2. Annotated Tags
+
+To create a new annotated tag, use:
+```bash
+git tag -a
+```
+
+Git will then open the default text editor and prompt you for additional information.  
+
+Similar to `git commit`, we can also use the `-m` option to pass a message directly and forgo the opening of the text editor
+
+### 10.3. Tagging Previous Commits
+We can also tag an older commit by providing the commit hash:
+```bash
+git tag -a <tagname> <commit-hash>
+```
+
+### 10.4. Forcing Tags
+Git will yell at us if we try to reuse a tag that is already referring to a commit. If we use the `-f` option, we can FORCE our tag through.
+```bash
+git tag -f <tagname>
+```
+
+### 10.5. Deleting Tags
+To delete a tag, use:
+```bash
+git tag -d <tagname>
+```
+
+### 10.6. Pushing Tags
+By default, the git push command doesn't transfer tags to remote servers. If you have a lot of tags that you want to push up at once, you can use the `--tags` option to the `git push` command. This will transfer all of your tags to the remote server that are not already there.
+```bash
+git push --tags
+```
 
 
 <br>
