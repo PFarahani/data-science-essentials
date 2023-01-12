@@ -39,13 +39,14 @@
   - [5.6. DELETE](#56-delete)
   - [5.7. ALTER](#57-alter)
   - [5.8. CHECK](#58-check)
+  - [5.9. Index](#59-index)
 - [6. Conditional Expressions and Procedures](#6-conditional-expressions-and-procedures)
   - [6.1. CASE](#61-case)
   - [6.2. COALESCE](#62-coalesce)
   - [6.3. CAST](#63-cast)
   - [6.4. NULLIF](#64-nullif)
   - [6.5. Views](#65-views)
-- [7. PostGreSQL with Python](#7-postgresql-with-python)
+- [7. PostgreSQL with Python](#7-postgresql-with-python)
 
 
 <br>
@@ -823,6 +824,41 @@ CREATE TABLE table_name(
 |<table><tr><td>**CREATE**<br><span style="color:lightblue">CREATE DATABASE</span> MyDatabase;<br><br><span style="color:lightblue">CREATE TABLE</span> MyTable (<br>&emsp;id <span style="color:pink">int</span>,<br>&emsp;name <span style="color:pink">varchar</span>(10));<br><br><span style="color:lightblue">CREATE INDEX</span> IndexName<br><span style="color:lightblue">ON</span> TableName(col1);<br></td></tr><tr><td>**ALTER**<br><span style="color:lightblue">ALTER TABLE</span> MyTable<br><span style="color:lightblue">DROP COLUMN</span> col5;<br><br><span style="color:lightblue">ALTER TABLE</span> MyTable<br><span style="color:lightblue">ADD</span> col5 <span style="color:pink">int</span>;<br></td></tr><tr><td>**DROP**<br><span style="color:lightblue">DROP DATABASE</span> MyDatabase;<br><span style="color:lightblue">DROP TABLE</span> MyTable;<br></td></tr></table> | <table><tr><td>**UPDATE**<br><span style="color:lightblue">UPDATE</span> MyTable<br><span style="color:lightblue">SET</span> col1 = 56<br><span style="color:lightblue">WHERE</span> col2 = 'something';<br></td></tr><tr><td>**DELETE**<br><span style="color:lightblue">DELETE FROM</span> MyTable<br><span style="color:lightblue">WHERE</span> col1 = 'something';<br></td></tr><tr><td>**INSERT**<br><span style="color:lightblue">INSERT INTO</span> MyTable (col1, col2)<br><span style="color:lightblue">VALUES</span> ('value1', 'value2');</td></tr><tr><td>**SELECT**<br><span style="color:lightblue">SELECT</span> col1, col2<br><span style="color:lightblue">FROM</span> MyTable;</td></tr></table>
 
 
+### 5.9. Index
+The purpose of creating an index in PostgreSQL is to improve the speed of data retrieval. An index is a separate data structure that stores a copy of specific columns from a table and allows for faster searching and sorting of data based on the indexed columns. Without an index, PostgreSQL would need to scan the entire table to find the requested data, which can be slow for large tables. By creating an index, the database can quickly locate the desired data using the indexed columns, which improves query performance.
+
+```sql
+--Create a table called "employees"
+CREATE TABLE employees (
+  employee_id SERIAL PRIMARY KEY,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  salary NUMERIC(10,2) NOT NULL
+);
+
+--Insert some data into the table
+INSERT INTO employees (first_name, last_name, salary)
+VALUES ('John', 'Doe', 50000),
+       ('Jane', 'Smith', 60000),
+       ('Bob', 'Johnson', 55000);
+
+--Create an index on the "last_name" column
+CREATE INDEX idx_employees_last_name ON employees (last_name);
+```
+
+In this example, we first create a table called "employees" with four columns: employee_id, first_name, last_name, and salary.
+
+Then we insert some data into the table using the `INSERT INTO` statement. After that, we create an index on the "last_name" column using the `CREATE INDEX` statement. This index will improve the performance of queries that filter or sort data based on the last_name.
+
+For example, the following query would run faster with the index:
+```sql
+SELECT * FROM employees WHERE last_name='Smith'
+```
+
+Indexes are useful for large table or when you have a high write/read operation.
+
+
+
 <br>
 <br>
 
@@ -986,8 +1022,8 @@ DROP VIEW IF EXISTS customer_info
 ```
 
 
-## 7. PostGreSQL with Python
-To use PostGreSQL in Python, we use the `pyscopg2` library.
+## 7. PostgreSQL with Python
+To use PostgreSQL in Python, we use the `pyscopg2` library.
 
 ```python
 """
