@@ -19,6 +19,10 @@
   - [4.1. Union](#41-union)
   - [4.2. Intersect](#42-intersect)
   - [4.3. Except](#43-except)
+- [5. Grouping Sets](#5-grouping-sets)
+  - [5.1. Grouping Sets](#51-grouping-sets)
+  - [5.2. Cube](#52-cube)
+  - [5.3. Rollup](#53-rollup)
 
 
 <br>
@@ -532,3 +536,88 @@ SELECT
 	column_1
 FROM table_2
 ```
+
+
+<br>
+<br>
+
+****************
+## 5. Grouping Sets
+
+### 5.1. Grouping Sets
+`GROUPING SETS` enable us to aggregate data multiple times for multiple groups in a single query.
+
+```sql
+SELECT
+	column_1,
+	column_2,
+	SUM(column_3) as new_sum
+FROM table_1
+GROUP BY GROUPING SETS (
+	(column_1), (column_1, column_2), ()
+)
+```
+
+Every part of a `GROUPING SETS` list represents a different `GROUP BY` clause.
+- (column_1) → `GROUP BY` column_1
+- (column_1, column_2) → `GROUP BY` column_1, column_2
+- () → Aggregate over all data
+
+**Note:** `GROUPING SETS` is functionally similar to using `UNION`, meaning that it is like grouping the results one by one and using `UNION` to append them all. However, since `GROUPING SETS` only uses one query, it's more efficient.
+
+### 5.2. Cube
+`GROUPING SETS` allow us to specify different ways of grouping data in one query, but `CUBE` provides a shortcut to listing grouping sets one by one. `CUBE` generates the grouping set for a list of columns and <u>all possible subsets</u>.
+
+```sql
+SELECT
+	column_1,
+	column_2,
+	SUM(column_3) as new_sum
+FROM table_1
+GROUP BY CUBE (column_1, column_2)
+
+/*
+Equivalent to:
+
+SELECT
+	…
+GROUP BY GROUPING SETS (
+(column_1, column_2),
+(column_1), 
+(column_2),
+()
+)
+*/
+```
+
+### 5.3. Rollup
+`ROLLUP` is another shorthand way of generating grouping sets which generates grouping sets of all listed columns. However, grouping sets for `ROLLUP` are considered <u>ordered</u> and <u>hierarchical</u>, unlike with `CUBE`.
+
+```sql
+SELECT
+	column_1,
+	column_2,
+	column_3,
+	SUM(column_4) as new_sum
+FROM table_1
+GROUP BY ROLLUP (column_1, column_2, column_3)
+
+/*
+Equivalent to:
+
+SELECT
+	…
+GROUP BY GROUPING SETS (
+(column_1, column_2, column_3),
+(column_1, column_2), 
+(column_1),
+()
+)
+*/
+```
+
+
+<br>
+<br>
+
+****************
