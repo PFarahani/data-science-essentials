@@ -23,6 +23,11 @@
   - [5.1. Grouping Sets](#51-grouping-sets)
   - [5.2. Cube](#52-cube)
   - [5.3. Rollup](#53-rollup)
+- [6. Schema Structures and Table Relationships](#6-schema-structures-and-table-relationships)
+  - [6.1. Information Schema](#61-information-schema)
+  - [6.2. Comment](#62-comment)
+  - [6.3. Adding and Dropping Constraints](#63-adding-and-dropping-constraints)
+  - [6.4. Adding and Dropping Foreign Keys](#64-adding-and-dropping-foreign-keys)
 
 
 <br>
@@ -614,6 +619,122 @@ GROUP BY GROUPING SETS (
 ()
 )
 */
+```
+
+
+<br>
+<br>
+
+****************
+## 6. Schema Structures and Table Relationships
+
+### 6.1. Information Schema
+Postgres has a "meta" schema exposing the database structure called `information_schema`.
+
+```sql
+SELECT *
+FROM information_schema.TABLE_NAME
+```
+
+`information_schema` has dozens of tables. A few useful ones are:
+- `tables` → Data on tables (ex: name, schema, etc.)
+- `columns` → Data on columns (ex: position, data type, maximum length, etc.)
+- `table_constraints` → Data on constraints (ex: primary keys, foreign keys, etc.)
+
+Check the documentation for more info:
+https://www.postgresql.org/docs/12/information-schema.html
+
+
+### 6.2. Comment
+You can add comments to any database object using the `COMMENT` command:
+- Tables
+- Columns
+- Schemas
+- Databases
+- Indexes
+- etc.
+
+```sql
+COMMENT ON OBJECT object_name IS 'text';
+
+COMMENT ON TABLE table_1 IS 'This is my table';
+
+COMMENT ON COLUMN table_1.column_1 IS 'The first column of table_1';
+```
+
+**Note:** To remove a comment, simply set to `NULL`.
+
+To view the comment on objects use this syntax:
+
+```sql
+SELECT obj_description(
+'schema_name.table_name'::regclass
+);
+
+SELECT col_description(
+'schema_name.table_name.column_name'::regclass, column_number
+);
+```
+
+### 6.3. Adding and Dropping Constraints
+Constraints restrict the data that can be added to your database by specifying criteria it must meet.
+
+Basic types of constraints:
+- `UNIQUE` → No duplicate values allowed in column.
+- `NOT NULL` → No NULL values allowed in column.
+- `CHECK` → Allows definition of expressions to check whether the data is acceptable or not.
+```sql
+ALTER TABLE table_name
+ADD CONSTRAINT constraint_name
+CHECK (total_cost > 0);
+
+ALTER TABLE table_name
+ADD CONSTRAINT constraint_name
+UNIQUE (column_1, column_2);
+```
+
+You can drop the constraint(s):
+```sql
+ALTER TABLE table_name
+DROP CONSTRAINT constraint_name [IF EXISTS];
+```
+
+In order to add `NOT NULL` constraint, the syntax is a little different:
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name 
+SET NOT NULL;
+```
+
+And to drop the `NOT NULL` constarint:
+```sql
+ALTER TABLE table_name
+ALTER COLUMN column_name
+DROP NOT NULL;
+```
+
+To view the constraints:
+```sql
+SELECT *
+FROM information_schema.table_constraints
+WHERE table_schema = 'TABLE_SCHEMA'
+    AND table_name = 'TABLE_NAME';
+```
+
+
+### 6.4. Adding and Dropping Foreign Keys
+Although foreign keys can be created when a table is created, they can be added later as well.
+```sql
+ALTER TABLE child_table
+ADD CONSTRAINT constraint_name
+FOREIGN KEY (column_1)
+REFERENCES parent_table (column_1);
+```
+
+Similar to other types of constraints, to drop the FK constraint we use the following syntax:
+```sql
+ALTER TABLE child_table
+DROP CONSTRAINT constraint_name;
 ```
 
 
