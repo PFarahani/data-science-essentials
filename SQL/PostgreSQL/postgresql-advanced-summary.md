@@ -33,6 +33,11 @@
   - [7.2. Beginning and Ending Transactions](#72-beginning-and-ending-transactions)
   - [7.3. Savepoint](#73-savepoint)
   - [7.4. Database Locks](#74-database-locks)
+- [8. Table Inheritance and Partitioning](#8-table-inheritance-and-partitioning)
+  - [8.1. Range Partitioning](#81-range-partitioning)
+  - [8.2. List Partitioning](#82-list-partitioning)
+  - [8.3. Hash Partitioning](#83-hash-partitioning)
+  - [8.4. Table Inheritance](#84-table-inheritance)
 
 
 <br>
@@ -858,6 +863,177 @@ DELETE FROM films WHERE rating < 5;
 
 COMMIT;
 ```
+
+
+<br>
+<br>
+
+****************
+## 8. Table Inheritance and Partitioning
+
+As database table sizes grow, we sometimes face performance issues. One way of solving this is with partitions. Partitions in Postgres allow us to divide a base table into smaller tables using:
+- Ranges
+- Lists
+- A hash
+
+### 8.1. Range Partitioning
+In range partitioning, partitions are divided by non-overlapping intervals.
+
+**Note:** 
+- Indexes created on a partitioned table will cascade to all partitions
+- `CHECK` and `NOT NULL` constraints are inherited by partitions
+- `UNIQUE`/primary key constraints must include <u>all partitioning columns</u>
+- Foreign keys work as usual on partitioned tables
+
+
+**Example:**
+
+```sql
+/*Create the partitioned table*/
+CREATE TABLE surgical_encounters_partitioned(
+    surgery_id integer NOT NULL,
+    master_patient_id integer NOT NULL,
+    surgical_admission_date date NOT NULL,
+    surgical_discharge_date date
+) PARTITION BY RANGE (surgical_admission_date);
+
+
+/*Create multiple partitions of the main table*/
+CREATE TABLE surgical_encounters_y2016
+    PARTITION OF surgical_encounters_partitioned
+    FOR VALUES FROM ('2016-01-01') to ('2017-01-01'); -- Select the specific values
+CREATE TABLE surgical_encounters_y2017
+    PARTITION OF surgical_encounters_partitioned
+    FOR VALUES FROM ('2017-01-01') to ('2018-01-01');
+CREATE TABLE surgical_encounters_default
+    PARTITION OF surgical_encounters_partitioned
+    DEFAULT; -- Select data that are outside our explicitly defined partitions
+
+
+/*[Optional] Create index on the partitioning columns*/
+CREATE INDEX ON surgical_encounters_partitioned (surgical_admission_date);
+
+
+/*Insert the data from the base table to our partitioned table*/
+INSERT INTO surgical_encounters_partitioned
+    SELECT
+        surgery_id,
+        master_patient_id,
+        surgical_admission_date,
+        surgical_discharge_date
+    FROM surgical_encounters;
+```
+
+### 8.2. List Partitioning
+Partitioning explicitly by lists is another way to partition tables in Postgres and it is useful when there are a small, known number of values for the partition field in the base table.
+
+
+**Example:**
+
+```sql
+/*Create the partitioned table*/
+CREATE TABLE departments_partitioned(
+    hospital_id integer NOT NULL,
+    department_id integer NOT NULL,
+    department_name text,
+    specialty_description text
+) PARTITION BY LIST (hospital_id);
+
+
+/*Create multiple partitions of the main table*/
+CREATE TABLE departments_h111000
+    PARTITION OF departments_partitioned
+    FOR VALUES IN (111000); -- Select the data in a list of specific value(s)
+CREATE TABLE departments_h112000
+    PARTITION OF departments_partitioned
+    FOR VALUES IN (112000);
+CREATE TABLE departments_default
+    PARTITION OF departments_partitioned
+    DEFAULT; -- Select data that are outside our explicitly defined partitions
+
+
+/*[Optional] Create index on the partitioning columns*/
+CREATE INDEX ON departments_partitioned (hospital_id);
+```
+
+### 8.3. Hash Partitioning
+Partitioning by hashes is useful when there is no obvious/natural way to divide your data. Hash partitioning is based on modular arithmetic. Ex:
+- 5 mod 5 = 0
+- 13 mod 5 = 3
+- 1 mod 5 = 1
+
+
+**Example:**
+
+```sql
+/*Create the partitioned table*/
+CREATE TABLE orders_procedures_partitioned(
+    orders_procedure_id integer NOT NULL,
+    patient_encounter_id integer NOT NULL,
+    ordering_provider_id integer REFERENCES physicians (id),
+    order_cd text
+) PARTITION BY HASH (orders_procedure_id, patient_encounter_id);
+
+
+/*Create multiple partitions of the main table*/
+CREATE TABLE orders_procedures_hash0
+    PARTITION OF orders_procedures_partitioned
+    FOR VALUES WITH (modulus 3, remainder 0);
+CREATE TABLE orders_procedures_hash1
+    PARTITION OF orders_procedures_partitioned
+    FOR VALUES WITH (modulus 3, remainder 1);
+CREATE TABLE orders_procedures_hash2
+    PARTITION OF orders_procedures_partitioned
+    FOR VALUES WITH (modulus 3, remainder 2);
+```
+
+In the exmple above if we take a look at the count of all rows from each partitioned table we see that the number of rows are distributed (somehow) equally.
+
+
+### 8.4. Table Inheritance
+Object-oriented programming (OOP) is a popular paradigm for writing software.
+An important feature/concept in OOP is inheritance. Postgres provides table inheritance for constructing parent-child table relationships; similar (but not the same!!) as OOP inheritance.
+```sql
+CREATE TABLE parent (
+	id INTEGER NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE child (
+	child_field TEXT
+) INHERITS (parent);
+```
+
+```sql
+-- Columns from parent, data from parent/child
+SELECT *
+FROM parent_table;
+
+-- Columns from parent/child, data from child
+SELECT *
+FROM child_table;
+
+-- Columns from parent, data from parent
+SELECT *
+FROM ONLY parent_table;
+```
+
+**Note:**
+- Child tables can inherit from more than one parent table.
+- `CHECK` and `NOT NULL` constraints are inherited.
+- `UPDATE`, `DELETE`, and `INSERT` operations work differently depending on whether they’re performed on parent or child tables.
+
+|                    | `INSERT`                      | `UPDATE` | `DELETE` |
+| ------------------ | ----------------------------- | -------- | -------- |
+| Parent<br> (no `ONLY`)| - Data exists in parent table<br> - No effect on child table | - Data updated in table where it exists| - Data deleted in table where it exists|
+| Child| - Data exists in child table<br> - Inherited column values visible in parent table| - Data updated in child table<br> - Changes visible in parent table| - Data deleted in child table<br> - Changes visible in parent table|
+
+Limitations of table inheritance:
+- Primary key, foreign keys, and indexes are not inherited by child tables.
+- Data inserted in child table is <u>not routed</u> into parent table
+
+Benefits of table inheritance:
+- Performance
+- Database management
 
 
 <br>
