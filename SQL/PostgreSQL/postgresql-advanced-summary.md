@@ -28,6 +28,11 @@
   - [6.2. Comment](#62-comment)
   - [6.3. Adding and Dropping Constraints](#63-adding-and-dropping-constraints)
   - [6.4. Adding and Dropping Foreign Keys](#64-adding-and-dropping-foreign-keys)
+- [7. Transactions](#7-transactions)
+  - [7.1. Update and Set](#71-update-and-set)
+  - [7.2. Beginning and Ending Transactions](#72-beginning-and-ending-transactions)
+  - [7.3. Savepoint](#73-savepoint)
+  - [7.4. Database Locks](#74-database-locks)
 
 
 <br>
@@ -696,7 +701,7 @@ UNIQUE (column_1, column_2);
 You can drop the constraint(s):
 ```sql
 ALTER TABLE table_name
-DROP CONSTRAINT constraint_name [IF EXISTS];
+DROP CONSTRAINT constraint_name IF EXISTS;
 ```
 
 In order to add `NOT NULL` constraint, the syntax is a little different:
@@ -735,6 +740,123 @@ Similar to other types of constraints, to drop the FK constraint we use the foll
 ```sql
 ALTER TABLE child_table
 DROP CONSTRAINT constraint_name;
+```
+
+
+<br>
+<br>
+
+****************
+## 7. Transactions
+Transactions help protect database integrity and they are logical units of work in a database which are usually handled "behind the scenes". One transaction can contain multiple SQL statements, that can be any combination of `SELECT`, `INSERT`, `CREATE`, `UPDATE`.
+
+Transactions are called ACID compliant: 
+- Atomicity: transactions are "all or nothing"
+- Consistency: successful transactions change DB state
+- Isolation: transactions are independent from each other
+- Durability: successful transactions persist after system failure
+
+
+### 7.1. Update and Set
+Updating data in a table/row in Postgres is done with the `UPDATE` command and the specific data to update and how they will be updated is stated in the `SET` command.
+
+```sql
+UPDATE table_name
+	SET column_1 = new_value,
+        column_2 = new_value_2
+	WHERE …
+
+UPDATE table_name
+	SET column_1 = new_value
+	WHERE id = 12345
+```
+
+### 7.2. Beginning and Ending Transactions
+
+**Example:**
+Defining transactions in Postgres requires us to define a starting point and an end point. We can start a transaction with `BEGIN` and end it with either `COMMIT` or `END`.
+```sql
+/*Begin the transaction*/
+BEGIN TRANSACTION;
+
+/*Update some of our data within the transaction*/
+UPDATE physicians
+    SET first_name = 'Bill',
+        full_name = concat(last_name, ', Bill')
+    WHERE id = 1;
+
+/*End the transaction*/
+END TRANSACTION;
+/*Alternatively you can use COMMIT to end the transaction*/
+COMMIT TRANSACTION;
+```
+
+**Note:** The `TRANSACTION` keyword is optional
+
+We can interrupt or cancel a transaction with `ROLLBACK`.
+```sql
+/*Begin the transaction*/
+BEGIN TRANSACTION;
+
+/*Update some of our data within the transaction*/
+UPDATE physicians
+    SET first_name = 'Bill',
+        full_name = concat(last_name, ', Bill')
+    WHERE id = 1;
+
+/*Cancel the changes*/
+ROLLBACK;
+```
+
+### 7.3. Savepoint
+Within transactions, we may want to save the state of a transaction at various points. Additionally, we may want to undo certain operations without aborting the entire transaction. Savepoints allow us to do both of these.
+
+```sql
+BEGIN;
+
+/*Define the savepoint*/
+SAVEPOINT savepoint_name;
+
+/*Rollback to the savepoint if you want to undo the
+SQL commands AFTER the savepoint*/
+ROLLBACK TO savepoint_name;
+
+/*If you don't want to ignore the commands after the
+savepoint and want them to be effective*/
+RELEASE savepoint_name;
+
+COMMIT;
+```
+
+### 7.4. Database Locks
+Database locks prevent users from modifying data that is being modified by a different transaction. Once the transaction is complete, the lock will be lifted.
+Postgres handles table locking automatically, but we can use `LOCK TABLE` to lock tables manually.
+
+```sql
+BEGIN;
+
+LOCK TABLE table_name --[lock_mode];
+
+/*One or more SQL statements*/
+
+END;
+```
+
+For more information on each lock mode, check out the documentation:
+https://www.postgresql.org/docs/current/explicit-locking.html
+
+**Example:**
+
+```sql
+BEGIN;
+
+LOCK TABLE films IN SHARE ROW EXCLUSIVE MODE;
+
+DELETE FROM films_user_comments WHERE id IN
+    (SELECT id FROM films WHERE rating < 5);
+DELETE FROM films WHERE rating < 5;
+
+COMMIT;
 ```
 
 
