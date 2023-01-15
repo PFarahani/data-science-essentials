@@ -80,7 +80,7 @@ We have two types of indexes:
     - Clustered index orders the physical structure of the table itself, which is why we can have only one clustered index per table.
     - Once the table has a clustered index it is called a "Clustered Table", since it is no longer a heap – aka stored in an unordered manner.
 
-![image1](assets/image1.png)
+![image1](assets/images/image1.png)
 
 2. NonClustered
     - NonClustered index creates the order in a separate structure from the data
@@ -90,7 +90,7 @@ We have two types of indexes:
     index.
     - Clustered index gets created by default when adding a primary key constraint, but it is possible to manually set it so that a NonClustered index gets created instead.
 
-![image2](assets/image2.png)
+![image2](assets/images/image2.png)
 
 
 <br>
@@ -213,7 +213,7 @@ INNER JOIN
 ORDER BY
     s.name
 ```
-![image3](assets/image3.jpg "Assigned schemas")
+![image3](assets/images/image3.jpg "Assigned schemas")
 
 In the results we can see *OurSchema* is assigned to the default user (*dbo*)
 And *OurSchema2* is assigned to the user named "*guest*"
@@ -738,7 +738,7 @@ There are four types of joining along with a feature of Self-Joining:
 - <span style="color:grey">**FULL OUTER JOIN**</span> (or <span style="color:grey">**FULL JOIN**</span>)
 - Self Joining
 
-![image6](assets/image6.jpg)
+![image6](assets/images/image4.jpg)
 
 ```
 Customer
@@ -964,7 +964,7 @@ We have the following set operations available to us in T-SQL:
 - <span style="color:lightblue">**INTERSECT**</span> allows you to see only the common matches between queries
 - <span style="color:lightblue">**EXCEPT**</span> allows you to get the result set which is in only one set and completely not in the other
 
-![image8](assets/image8.jpg)
+![image8](assets/images/image5.jpg)
 
 ```sql
 SELECT

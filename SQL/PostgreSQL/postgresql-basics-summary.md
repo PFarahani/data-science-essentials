@@ -344,7 +344,7 @@ id  name       id   name
 1   Albert     2    Albert
 3   Bobby      4    Bobby
 ```
-![image1](assets/image1.png "An INNER JOIN, (also written LEFT INNER JOIN)")
+![image1](assets/images/image1.png "An INNER JOIN, (also written LEFT INNER JOIN)")
 
 
 ### 3.2. FULL OUTER JOIN
@@ -366,7 +366,7 @@ null  null       3     William
 ```
 Note how if there is no match, the missing side will produce a null.
 
-![image2](assets/image2.png "FULL OUTER JOIN")
+![image2](assets/images/image2.png "FULL OUTER JOIN")
 
 
 ### 3.3. LEFT OUTER JOIN
@@ -384,7 +384,7 @@ id  name       id    name
 3   Bobby      4     Bobby
 4   Zack       null  null
 ```
-![image3](assets/image3.png "LEFT OUTER JOIN")
+![image3](assets/images/image3.png "LEFT OUTER JOIN")
 
 
 ### 3.4. SELF JOIN
@@ -439,7 +439,7 @@ id  name       id     name
 2   Xavier     -      -
 4   Zack       -      -
 ```
-![image4](assets/image4.png "A LEFT OUTER JOIN with a WHERE clause excluding nulls in the logins table")
+![image4](assets/images/image4.png "A LEFT OUTER JOIN with a WHERE clause excluding nulls in the logins table")
 
 Another example of this is trying to produce a set of records that is unique to the Left Table and the Right Table. In other words, for our case: Produce a table that has the records that are unique to either Registrations or Logins.
 ```sql
@@ -457,7 +457,7 @@ id    name       id    name
 --    ---        1     Yolanda
 --    ---        3     William
 ```
-![image5](assets/image5.png)
+![image5](assets/images/image5.png)
 
 
 ### 3.6. JOIN vs UNION vs UNION ALL 
