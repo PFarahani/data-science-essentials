@@ -38,6 +38,12 @@
   - [8.2. List Partitioning](#82-list-partitioning)
   - [8.3. Hash Partitioning](#83-hash-partitioning)
   - [8.4. Table Inheritance](#84-table-inheritance)
+- [9. Views](#9-views)
+  - [9.1. Creating Views](#91-creating-views)
+  - [9.2. Modifying and Deleting Views](#92-modifying-and-deleting-views)
+  - [9.3. Updatable Views](#93-updatable-views)
+  - [9.4. Materialized Views](#94-materialized-views)
+  - [9.5. Recursive Views](#95-recursive-views)
 
 
 <br>
@@ -1040,3 +1046,152 @@ Benefits of table inheritance:
 <br>
 
 ****************
+## 9. Views
+
+A view is basically a stored SELECT query that can be used to simplify or replace complex queries, make data easier to use for end-users, or restrict data access.
+
+
+### 9.1. Creating Views
+
+```sql
+CREATE VIEW my_view AS
+	SELECT *
+	FROM table_1 t1
+	LEFT OUTER JOIN table_2 t2 
+ON t1.join_condition = t2.join_condition 
+	WHERE conditions IS NOT NULL;
+```
+
+### 9.2. Modifying and Deleting Views
+
+```sql
+-- Update/Change the query
+CREATE OR REPLACE VIEW my_view AS
+	SELECT …;
+-- Delete the view
+DROP VIEW IF EXISTS my_view;
+-- Rename the view
+ALTER VIEW IF EXISTS my_view
+    RENAME TO my_new_view_name;
+```
+
+**Note:** It's always a good idea to use `IF EXISTS` in order to avoid any errors if the view is not available.
+
+### 9.3. Updatable Views
+
+By default, views in Postgres can be updated.
+`INSERT`, `UPDATE`, and `DELETE` will work when certain conditions are met.
+
+- The view mustn't conatin:
+    - window functions
+    - aggregate functions
+    - `LIMIT`
+    - `GROUP BY`, `HAVING`, etc.
+    - any set operations (e.g. `UNION`)
+- The view must be built on single table
+
+To restrict the type of data that can be modified through the view, we can use `WITH CHECK OPTION`. This checks that data satisfies view constraints before modifying or inserting data and the data that fails this check will not be modified/inserted.
+
+```sql
+CREATE OR REPLACE VIEW sales_by_region AS 
+SELECT region, SUM(sales) as total_sales
+FROM orders
+WHERE date_placed >= '2022-01-01'
+GROUP BY region
+WITH CHECK OPTION;
+```
+
+In this example, we are creating a view called "sales_by_region" that shows the total sales for each region, but only for orders that were placed on or after January 1st, 2022. The `WITH CHECK OPTION` clause ensures that any updates or inserts made through the view will also include the `WHERE` clause filter on "date_placed" column, so that the view will always only show sales for orders placed on or after January 1st, 2022.
+
+For example, if an attempt is made to insert a row into the view with a "date_placed" value of "2021-12-31", the insert will be rejected because it does not meet the condition specified in the view's `SELECT` statement. Similarly, if an attempt is made to update a row in the view to change the "date_placed" value to a date before January 1st, 2022, the update will also be rejected.
+
+
+### 9.4. Materialized Views
+
+Views in Postgres do not store the underlying data from the `SELECT` statement by default. Sometimes, we need speed of access in addition to the convenience of a view.
+
+The main advantage of using a materialized view is that it can greatly improve query performance. Because the view's results are pre-calculated and stored on disk, querying a materialized view is much faster than querying the underlying tables. This can be especially useful for large datasets, complex queries, or queries that need to be executed frequently.
+
+Another advantage of using materialized views is that they can be used to provide real-time access to data. Because the materialized view is a separate table, it can be queried independently of the underlying tables, and updates to the underlying tables do not affect the materialized view. This can be useful in scenarios where the underlying tables are updated frequently and the view's results need to be available in real-time.
+
+```sql
+CREATE MATERIALIZED VIEW sales_by_product AS
+SELECT product_id, SUM(quantity) as total_quantity, SUM(price) as total_sales
+FROM orders
+GROUP BY product_id
+WITH DATA;
+```
+
+Once the materialized view is created, it can be queried just like any other table. Because the results of the materialized view are pre-calculated and stored on disk, this query will be much faster than querying the underlying "orders" table and calculating the sums on the fly.
+
+Also, you can schedule a job or a task to refresh the materialized view with the data from the underlying tables. This way, the materialized view will always have the most recent data available.
+
+```sql
+REFRESH MATERIALIZED VIEW sales_by_product;
+```
+
+This command will update the materialized view with the new data from the underlying table, so it will always be up to date.
+
+**Note:** `WITH DATA` option will immediately populate the materialized view with data, so it will be immediately available for querying, while `WITH NO DATA` will create the materialized view but it will not be populated with data and will not be available for querying until data is added to it using the `REFRESH` statement.
+
+The `CONCURRENTLY` option is used when creating or refreshing a materialized view, it allows to perform the operation in a non-blocking way, which means that other queries can continue to run against the underlying tables while the materialized view is being created or refreshed. This can be useful in scenarios where the underlying tables are large or busy, and it's not possible or desirable to block other queries while the materialized view is being created or refreshed. It's also useful for the case where the materialized view is based on another materialized view, so it avoids the locking of the previous materialized view. In short, the CONCURRENTLY option allows to perform the operation in a non-blocking way, which can improve the performance and availability of the database for other queries.
+
+```sql
+CREATE MATERIALIZED VIEW sales_by_product AS
+SELECT product_id, SUM(quantity) as total_quantity, SUM(price) as total_sales
+FROM orders
+GROUP BY product_id
+WITH (concurrently=true);
+```
+
+```sql
+REFRESH MATERIALIZED VIEW sales_by_product CONCURRENTLY;
+```
+
+Similar to views, you can drop materialized views using the syntax below:
+
+```sql
+DROP MATERIALIZED VIEW IF EXISTS my_view;
+```
+
+
+### 9.5. Recursive Views
+
+Recursive views are a type of view that references itself in its own `SELECT` statement, allowing for the creation of a hierarchical data structure. They are used to work with hierarchical data, such as data that is organized into a tree or a graph.
+
+For example, consider a table of employees with columns "employee_id" and "manager_id" which represents the reporting structure in an organization. A recursive view can be created to show the complete reporting hierarchy, where each row in the view represents an employee, and the "manager_id" column references the id of the employee's manager.
+
+```sql
+CREATE VIEW my_view AS
+    WITH RECURSIVE employee_hierarchy (employee_id, manager_id, name) AS (
+        -- non-recursive query
+        SELECT employee_id, manager_id, name FROM employees
+        WHERE manager_id IS NULL
+        UNION
+        -- recursive query
+        SELECT e.employee_id, e.manager_id, e.name
+        FROM employees e
+        JOIN employee_hierarchy eh ON e.manager_id = eh.employee_id
+    )
+SELECT * FROM employee_hierarchy;
+```
+
+This can be also written like this:
+
+```sql
+CREATE RECURSIVE VIEW employee_hierarchy (employee_id, manager_id, name) AS
+-- non-recursive query
+SELECT employee_id, manager_id, name FROM employees
+WHERE manager_id IS NULL
+UNION
+-- recursive query
+SELECT e.employee_id, e.manager_id, e.name
+FROM employees e
+JOIN employee_hierarchy eh ON e.manager_id = eh.employee_id
+```
+
+**Note:** In the recursive view's syntax, we `UNION` or `UNION ALL` the non-recursive base query first and then have the recursive query second.
+
+In this example, the recursive view "employee_hierarchy" is defined using a common table expression (CTE) which has a recursive part. The CTE first selects all the employees where the "manager_id" is null, which represents the top of the hierarchy and then for each employee, it will select all the employees who have the current employee's id as manager_id. This allows for the creation of a hierarchical data structure, where each row has a parent-child relationship with another row in the table. And the final `SELECT` statement retrieves all the rows from the "employee_hierarchy" CTE.
+
+In summary, Recursive views are a powerful tool for working with hierarchical data, they allow a more natural and intuitive representation of hierarchical data, they simplify the task of querying and manipulating hierarchical data, and they help in writing queries that traverse the hierarchy.
