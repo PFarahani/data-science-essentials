@@ -44,6 +44,9 @@
   - [9.3. Updatable Views](#93-updatable-views)
   - [9.4. Materialized Views](#94-materialized-views)
   - [9.5. Recursive Views](#95-recursive-views)
+- [10. User-Defined Functions](#10-user-defined-functions)
+  - [10.1. Creating Functions](#101-creating-functions)
+  - [10.2. Modifying Functions](#102-modifying-functions)
 
 
 <br>
@@ -1026,7 +1029,7 @@ FROM ONLY parent_table;
 **Note:**
 - Child tables can inherit from more than one parent table.
 - `CHECK` and `NOT NULL` constraints are inherited.
-- `UPDATE`, `DELETE`, and `INSERT` operations work differently depending on whether they’re performed on parent or child tables.
+- `UPDATE`, `DELETE`, and `INSERT` operations work differently depending on whether they're performed on parent or child tables.
 
 |                    | `INSERT`                      | `UPDATE` | `DELETE` |
 | ------------------ | ----------------------------- | -------- | -------- |
@@ -1195,3 +1198,154 @@ JOIN employee_hierarchy eh ON e.manager_id = eh.employee_id
 In this example, the recursive view "employee_hierarchy" is defined using a common table expression (CTE) which has a recursive part. The CTE first selects all the employees where the "manager_id" is null, which represents the top of the hierarchy and then for each employee, it will select all the employees who have the current employee's id as manager_id. This allows for the creation of a hierarchical data structure, where each row has a parent-child relationship with another row in the table. And the final `SELECT` statement retrieves all the rows from the "employee_hierarchy" CTE.
 
 In summary, Recursive views are a powerful tool for working with hierarchical data, they allow a more natural and intuitive representation of hierarchical data, they simplify the task of querying and manipulating hierarchical data, and they help in writing queries that traverse the hierarchy.
+
+
+<br>
+<br>
+
+****************
+## 10. User-Defined Functions
+
+PostgreSQL user-defined functions (UDFs) are a powerful feature that allows developers to create custom functions in the database. These functions can be used to perform complex calculations, manipulate data, or perform other tasks that are not provided by the built-in functions in PostgreSQL.
+
+### 10.1. Creating Functions
+
+**Note:** UDFs can be written in a variety of languages, including SQL, PL/pgSQL, PL/Tcl, and PL/Perl. The most common language used for UDFs is PL/pgSQL, which is a procedural language similar to PL/SQL in Oracle.
+
+Here is an example of a simple UDF written in PL/pgSQL that calculates the square of a given number:
+
+```sql
+CREATE FUNCTION square(x INTEGER)
+/*
+This line is the start of the syntax to create a new function named "square" and it takes in a single parameter "x" of data type INTEGER.
+*/
+RETURNS INTEGER
+/*
+This line specifies that the function will return a value of data type INTEGER.
+*/
+AS $$
+BEGIN
+/*
+This line starts the body of the function and the "AS $$" is used to indicate the beginning of the code block.
+*/
+  RETURN x * x;
+/*
+This line is the actual logic of the function, where it calculates the square of the input parameter "x" by multiplying it with itself.
+*/
+END;
+$$ LANGUAGE plpgsql;
+/*
+This line indicates the end of the function's code block and "END;" is used to indicate the end of the function's logic. "$$ LANGUAGE plpgsql" is used to specify that this function is written in PL/pgSQL language.
+*/
+```
+
+This function can be called in a SQL statement like this:
+
+```sql
+SELECT square(5);
+```
+
+This will return the value 25.
+
+`DECLARE` is used in PL/pgSQL functions to define variables that will be used within the function. Variables defined with `DECLARE` are only visible within the function and are not accessible outside of it. It is used to define the variable's data type and an optional initial value. Once the variable is declared, it can be used in the function's logic to store and manipulate data. For example, it can be used to store the result of a query, perform calculations, or hold temporary values.
+
+Another example of a UDF is one that takes in a table name and returns the number of rows in that table:
+
+```sql
+CREATE OR REPLACE FUNCTION count_rows(table_name TEXT)
+RETURNS INTEGER AS $$
+DECLARE
+  row_count INTEGER;
+BEGIN
+  EXECUTE 'SELECT COUNT(*) FROM ' || table_name INTO row_count;
+  RETURN row_count;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+This function can be called in a SQL statement like this:
+
+```sql
+SELECT count_rows('employees');
+```
+
+This will return the number of rows in the 'employees' table.
+
+UDFs can also take in multiple parameters, return multiple values, and even use dynamic SQL. They can also be used in conjunction with other SQL statements, such as `SELECT`, `INSERT`, `UPDATE`, and `DELETE`.
+
+
+There are several ways to call a user-defined function (UDF) in PostgreSQL:
+
+- Using the SELECT statement: This is the most common way to call a UDF. The UDF is included in the SELECT statement, along with any other columns or expressions that are needed. For example:
+
+    ```sql
+    SELECT square(5);
+    ```
+
+- Using the CALL statement: This method is used to call a UDF that returns no value, such as a function that only performs an action or updates data. The CALL statement is followed by the name of the UDF and any required parameters. For example:
+
+    ```sql
+    CALL update_employee_salary(5, 1000);
+    ```
+
+- Using the EXECUTE statement: This method is used to execute a UDF and store its result in a variable. The EXECUTE statement is followed by the name of the UDF and any required parameters, as well as the INTO keyword and the variable name. For example:
+
+    ```sql
+    EXECUTE 'SELECT square('||x||')' INTO result;
+    ```
+
+There are three noatations for defining UDF's parameters:
+- Positional
+```sql
+SELECT f_function(1, 3, 12);
+```
+- Named
+```sql
+SELECT f_function(arg1 => 1, arg2 => 3, arg3 => 12);
+```
+- Mixed
+```sql
+SELECT f_function(1, arg2 => 3, arg3 => 12); -- Positional can't follow named
+```
+
+### 10.2. Modifying Functions
+
+Dropping and modifying user-defined functions is very similar to dropping or modifying views.
+
+```sql
+DROP FUNCTION IF EXISTS f_function;
+```
+
+```sql
+CREATE OR REPLACE FUNCTION f_function(arg1 arg_type, arg2 arg_type);
+```
+
+**Note:** `CREATE OR REPLACE` has limitations:
+- Can't change name assigned to input parameters
+- Can't change name of output parameter if more than 1
+- Can add name to <u>unnamed inputs</u>
+
+
+`ALTER FUNCTION` allows us to do a few things:
+- Rename function
+- Change owner
+- Change schema
+- Set or reset system settings, for example: change the search_path of the function
+- Define dependencies
+
+```sql
+-- rename function 
+ALTER FUNCTION square RENAME TO power_of_two;
+
+-- change owner 
+ALTER FUNCTION power_of_two(x INTEGER) OWNER TO new_owner;
+
+-- change schema
+ALTER FUNCTION new_schema.power_of_two(x INTEGER) SET SCHEMA new_schema;
+
+-- set search_path
+ALTER FUNCTION new_schema.power_of_two(x INTEGER) SET search_path = my_schema;
+
+-- define dependencies
+ALTER FUNCTION new_schema.power_of_two(x INTEGER) ADD DEPENDENCY my_table;
+```
