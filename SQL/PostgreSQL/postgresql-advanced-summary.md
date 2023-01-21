@@ -50,6 +50,10 @@
 - [11. Stored Procedures](#11-stored-procedures)
   - [11.1. Creating and Calling Stored Procedures](#111-creating-and-calling-stored-procedures)
   - [11.2. Modifying Stored Procedures](#112-modifying-stored-procedures)
+- [12. Triggers](#12-triggers)
+  - [12.1. Creating Triggers](#121-creating-triggers)
+  - [12.2. Enabling and Disabling Triggers](#122-enabling-and-disabling-triggers)
+  - [12.3. Modifying and Dropping Triggers](#123-modifying-and-dropping-triggers)
 
 
 <br>
@@ -1464,6 +1468,148 @@ BEGIN
     RAISE NOTICE 'Hello, modified world!';
 END;
 $$ LANGUAGE plpgsql;
+```
+
+
+<br>
+<br>
+
+****************
+## 12. Triggers
+
+A trigger in PostgreSQL is a set of actions that are automatically executed in response to certain events, such as `INSERT`, `UPDATE`, or `DELETE` statements on a specific table or view. Triggers are defined using the `CREATE TRIGGER` statement and are written in PL/pgSQL, which is a procedural language designed specifically for PostgreSQL.
+
+### 12.1. Creating Triggers
+
+Triggers consist of a trigger function and a link to a table and operation.
+Trigger functions can run `BEFORE`, `AFTER`, or `INSTEAD OF` their triggering operations.
+
+Here are some examples of how to create and use triggers in PostgreSQL:
+
+1. Create a simple trigger:
+    ```sql
+    CREATE TRIGGER my_trigger
+    AFTER INSERT ON my_table
+    FOR EACH ROW
+    EXECUTE FUNCTION my_function();
+    ```
+    This trigger creates a function called "my_function" that is executed after each row is inserted into the "my_table" table.
+
+2. Creating a trigger that updates a timestamp:
+    ```sql
+    CREATE TRIGGER update_timestamp
+    BEFORE UPDATE ON my_table
+    FOR EACH ROW
+    EXECUTE FUNCTION update_timestamp();
+    ```
+    This trigger creates a function called "update_timestamp" that updates the timestamp column of "my_table" with the current date and time before each row is updated.
+
+3. Creating a trigger that enforces data integrity:
+    ```sql
+    CREATE TRIGGER check_balance
+    BEFORE INSERT OR UPDATE ON account
+    FOR EACH ROW
+    EXECUTE FUNCTION check_balance();
+    ```
+    This trigger creates a function called "check_balance" that checks the balance of the account table, if the balance is less than 0, it will not allow to insert or update the row.
+
+4. Creating a trigger that allows you to execute your own logic instead of the triggering operation:
+
+    This type of trigger is useful when you want to perform some custom action or validation before the actual operation takes place.
+    ```sql
+    CREATE TRIGGER update_salary
+    INSTEAD OF UPDATE ON employees
+    FOR EACH ROW
+    EXECUTE FUNCTION update_salary();
+    ```
+    This trigger creates a function called "update_salary" that runs instead of the UPDATE statement on the "employees" table. The function may contain the logic for updating the salary, for example, it can check if the new salary is greater than the old salary and if it is, it will update the salary, otherwise it will raise an exception.
+    ```sql
+    CREATE OR REPLACE FUNCTION update_salary()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        IF NEW.salary > OLD.salary THEN
+            UPDATE employees SET salary = NEW.salary WHERE id = NEW.id;
+            RETURN NEW;
+        ELSE
+            RAISE EXCEPTION 'The new salary must be greater than the old salary';
+        END IF;
+    END;
+    $$ LANGUAGE plpgsql;
+    ```
+    **Note:** `INSTEAD OF` triggers are not supported for all the events, it can be used only with `INSERT`, `UPDATE` and `DELETE` events.
+
+Triggers can also be written in Stored Procedures, this allows you to perform complex queries and actions inside the trigger. Also, triggers can be set to execute for each row affected by the triggering statement or just once for the whole statement. And triggers can be set to execute for specific events such as INSERT, UPDATE, DELETE, TRUNCATE and even for the DDl commands.
+
+Trigger functions have access to the records being modified via the `OLD` (for `UPDATE` and `DELETE`) and `NEW` (for `INSERT` and `UPDATE`) variables. These variables are automatically created by PostgreSQL and contain the values of the affected rows before and after the triggering event, respectively. This allows you to compare the old and new values and perform any necessary actions based on those values.
+
+Here is an example of how you might use the OLD and NEW variables in an UPDATE trigger function:
+
+```sql
+CREATE OR REPLACE FUNCTION update_employee_history()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.salary != OLD.salary THEN
+        INSERT INTO employee_history (employee_id, old_salary, new_salary)
+        VALUES (OLD.id, OLD.salary, NEW.salary);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+```
+This function will check if the salary of the employee has changed, if it did, it will insert the old salary, new salary and employee_id into the employee_history table.
+
+Similarly, in an `INSERT` trigger, the `NEW` variable contains the values of the row being inserted, and in a `DELETE` trigger, the `OLD` variable contains the values of the row being deleted.
+
+
+### 12.2. Enabling and Disabling Triggers
+
+In PostgreSQL, you can enable and disable triggers using the `ALTER TABLE` statement. To disable a trigger, you can use the following syntax:
+
+```sql
+-- To disable a trigger
+ALTER TABLE <table_name> DISABLE TRIGGER <trigger_name>;
+
+-- To re-enable a trigger
+ALTER TABLE <table_name> ENABLE TRIGGER <trigger_name>;
+```
+
+When a trigger is disabled, it will not execute in response to the triggering event. This can be useful in situations where you need to perform a large number of updates or deletes on a table and want to temporarily disable the triggers to improve performance.
+
+It's worth noting that disabling and enabling triggers will affect all the triggers of the table, if you need to disable or enable a specific set of triggers, you'll need to do it separately. Also, disabling and enabling triggers only affects the current session, if you want to disable a trigger permanently, you'll need to drop it using the `DROP TRIGGER` statement.
+
+### 12.3. Modifying and Dropping Triggers
+
+Similar to functions, views, and procedures, modifying and dropping triggers in PostgreSQL can be done using the `ALTER TRIGGER` and `DROP TRIGGER` statements, respectively.
+
+```sql
+-- Modify the trigger 
+ALTER TRIGGER update_salary
+ON employees
+FOR EACH ROW
+EXECUTE FUNCTION update_salary_v2();
+
+-- Create or Replace the new function
+CREATE OR REPLACE FUNCTION update_salary_v2()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.salary > OLD.salary THEN
+        UPDATE employees SET salary = NEW.salary WHERE id = NEW.id;
+        -- insert into a new table
+        INSERT INTO employee_salary_history (employee_id, old_salary, new_salary)
+        VALUES (OLD.id, OLD.salary, NEW.salary);
+        RETURN NEW;
+    ELSE
+        RAISE EXCEPTION 'The new salary must be greater than the old salary';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Drop the trigger
+DROP TRIGGER update_salary_v2 ON employees;
+
+-- Rename the trigger
+ALTER TRIGGER trigger_name ON table_name
+RENAME TO new_trigger_name;
 ```
 
 
