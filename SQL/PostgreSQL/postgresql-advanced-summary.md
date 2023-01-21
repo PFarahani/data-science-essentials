@@ -47,6 +47,9 @@
 - [10. User-Defined Functions](#10-user-defined-functions)
   - [10.1. Creating Functions](#101-creating-functions)
   - [10.2. Modifying Functions](#102-modifying-functions)
+- [11. Stored Procedures](#11-stored-procedures)
+  - [11.1. Creating and Calling Stored Procedures](#111-creating-and-calling-stored-procedures)
+  - [11.2. Modifying Stored Procedures](#112-modifying-stored-procedures)
 
 
 <br>
@@ -1334,18 +1337,137 @@ CREATE OR REPLACE FUNCTION f_function(arg1 arg_type, arg2 arg_type);
 - Define dependencies
 
 ```sql
--- rename function 
+-- Rename function 
 ALTER FUNCTION square RENAME TO power_of_two;
 
--- change owner 
+-- Change owner 
 ALTER FUNCTION power_of_two(x INTEGER) OWNER TO new_owner;
 
--- change schema
+-- Change schema
 ALTER FUNCTION new_schema.power_of_two(x INTEGER) SET SCHEMA new_schema;
 
--- set search_path
+-- Set search_path
 ALTER FUNCTION new_schema.power_of_two(x INTEGER) SET search_path = my_schema;
 
--- define dependencies
+-- Define dependencies
 ALTER FUNCTION new_schema.power_of_two(x INTEGER) ADD DEPENDENCY my_table;
 ```
+
+
+<br>
+<br>
+
+****************
+## 11. Stored Procedures
+
+A stored procedure in PostgreSQL is a reusable routine that can accept input parameters and return a set of rows or a single value. They are similar to functions, but they can also perform actions that modify the database, such as inserting, updating, or deleting data. Stored procedures are written in PL/pgSQL, which is a procedural language designed specifically for PostgreSQL.
+
+### 11.1. Creating and Calling Stored Procedures
+
+The syntax for creating a stored procedure is similart to creating functions. Here are some examples of how to create and use stored procedures in PostgreSQL:
+
+1. Creating a simple stored procedure:
+    ```sql
+    CREATE OR REPLACE PROCEDURE my_proc()
+    AS $$
+    BEGIN
+        RAISE NOTICE 'Hello, world!';
+    END;
+    $$ LANGUAGE plpgsql;
+    ``` 
+    This stored procedure simply prints the message "Hello, world!" when it is executed.
+
+2. Creating a stored procedure with input parameters:
+    ```sql
+    CREATE OR REPLACE PROCEDURE add_numbers(IN num1 INT, IN num2 INT)
+    AS $$
+    BEGIN
+        RAISE NOTICE 'The sum of % and % is %', num1, num2, num1 + num2;
+    END;
+    $$ LANGUAGE plpgsql;
+    ```
+    This stored procedure takes in two integers as input parameters and calculates the sum of them, then prints out the result.
+
+3. Creating a stored procedure that returns a set of rows:
+    ```sql
+    CREATE OR REPLACE PROCEDURE get_employees()
+    RETURNS TABLE (id INT, name TEXT, salary NUMERIC)
+    AS $$
+    BEGIN
+        RETURN QUERY SELECT id, name, salary FROM employees;
+    END;
+    $$ LANGUAGE plpgsql;
+    ```
+    This stored procedure returns a table of rows containing the id, name, and salary of all employees in the "employees" table.
+
+4. Create a stored procedure that drops and recreates a table:
+    ```sql
+    CREATE OR REPLACE PROCEDURE recreate_table()
+    AS $$
+    BEGIN
+        DROP TABLE IF EXISTS test_table();
+        CREATE TABLE test_table(
+            id INT
+        )
+    END;
+    $$ LANGUAGE plpgsql;
+    ```
+
+To call or execute a stored procedure, you can use the `CALL` statement:
+
+```sql
+CALL my_proc();
+CALL add_numbers(3, 5);
+SELECT * FROM get_employees();
+```
+
+**Note:** Stored procedures can also be used in Triggers, and help to maintain Data Integrity and also can be used to perform complex queries.
+
+There are several reasons why we might want to use stored procedures instead of functions in PostgreSQL:
+
+1. **Data modification:** Stored procedures can perform actions that modify the database, such as inserting, updating, or deleting data, while functions can only return a value or a set of rows.
+2. **Concurrency control:** Stored procedures can include explicit transaction control statements, such as COMMIT and ROLLBACK, which allows you to manage concurrent access to the database. Functions, on the other hand, are not allowed to modify the data and thus can not be used to control concurrent access to the data.
+3. **Performance:** Stored procedures can be faster than running multiple separate SQL statements, because the database engine can optimize the execution of a stored procedure as a single unit. This can be especially beneficial for complex queries or operations that involve multiple tables.
+4. **Security:** Stored procedures can be used to implement fine-grained access control, by granting or revoking execute privileges on specific stored procedures rather than on tables or views. This allows you to control which users can perform certain actions on the data.
+5. **Code Reusability:** Stored procedures can be reused across multiple applications and can be called with different parameters, thus it's a good way to maintain the DRY principle.
+6. **Complex Queries:** Stored procedures can help to perform complex queries and operations that involve multiple tables and joins, and return the result in a more organized way.
+
+### 11.2. Modifying Stored Procedures
+
+Modifying a stored procedure in PostgreSQL is similar to functions and view and it's a two-step process:
+1. Drop the existing stored procedure
+2. Create a new version of the stored procedure with the desired changes
+
+Here is an example of how to modify a stored procedure called "my_proc":
+
+```sql
+-- Drop the existing stored procedure
+DROP PROCEDURE IF EXISTS my_proc;
+
+-- Create a new version of the stored procedure with the changes
+CREATE OR REPLACE PROCEDURE my_proc()
+AS $$
+BEGIN
+    -- New logic or changes here
+    RAISE NOTICE 'Hello, modified world!';
+END;
+$$ LANGUAGE plpgsql;
+```
+
+You can also use `ALTER PROCEDURE` statement to modify the Stored Procedures.
+
+```sql
+ALTER PROCEDURE my_proc()
+AS $$
+BEGIN
+    -- New logic or changes here
+    RAISE NOTICE 'Hello, modified world!';
+END;
+$$ LANGUAGE plpgsql;
+```
+
+
+<br>
+<br>
+
+****************
