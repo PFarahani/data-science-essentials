@@ -54,6 +54,12 @@
   - [12.1. Creating Triggers](#121-creating-triggers)
   - [12.2. Enabling and Disabling Triggers](#122-enabling-and-disabling-triggers)
   - [12.3. Modifying and Dropping Triggers](#123-modifying-and-dropping-triggers)
+- [13. Useful Methods and Tools](#13-useful-methods-and-tools)
+  - [13.1. EXPLAIN and EXPLAIN ANALYZE](#131-explain-and-explain-analyze)
+  - [13.2. Dropping Data with TRUNCATE](#132-dropping-data-with-truncate)
+  - [13.3. Exporting and Importing Data with COPY](#133-exporting-and-importing-data-with-copy)
+  - [13.4. Arrays and Array Functions](#134-arrays-and-array-functions)
+  - [13.5. JSON and JSON Functions](#135-json-and-json-functions)
 
 
 <br>
@@ -1617,3 +1623,201 @@ RENAME TO new_trigger_name;
 <br>
 
 ****************
+## 13. Useful Methods and Tools
+
+### 13.1. EXPLAIN and EXPLAIN ANALYZE
+
+PostgreSQL's `EXPLAIN` and `EXPLAIN ANALYZE` are used to analyze the execution plan of a SQL query.
+
+`EXPLAIN` shows the query plan that the PostgreSQL planner generates for a query, which includes the sequence of operations that the planner will use to execute the query, such as which indexes will be used and in which order tables will be joined.
+
+`EXPLAIN ANALYZE`, on the other hand, not only shows the query plan, but also executes the query and provides additional information about the actual runtime behavior of the query, such as the number of rows returned, the time taken to execute each operation, and the number of disk I/O operations.
+
+**Example:**
+
+```sql
+EXPLAIN SELECT * FROM users WHERE name = 'John';
+
+EXPLAIN ANALYZE SELECT * FROM users WHERE name = 'John';
+```
+
+It gives you the detailed information about the query execution plan, the time taken to execute each operation, and the number of rows returned by the query. This can be helpful in identifying performance bottlenecks and optimizing the query for better performance.
+
+Running `EXPLAIN ANALYZE` with queries that include `UPDATE`, `INSERT`, or `DELETE` can be dangerous because the query will actually execute the update, insert, or delete operations, which can have unintended consequences and it could cause data loss or corruption. To use `EXPLAIN ANALYZE` safely with these queries, we can use a transaction:
+
+```sql
+BEGIN;
+EXPLAIN ANALYZE
+UPDATE users SET email = 'new_email@example.com' WHERE name = 'John';
+ROLLBACK;
+```
+
+By doing this, the update query will be executed and we can see the actual execution plan and runtime statistics, but the changes made by the update query will be rolled back and the original data remains unchanged.
+
+`EXPLAIN` command can output the query plan in a variety of formats, which can be specified using the `FORMAT` option:
+- `text`: The default format, which outputs the query plan in a human-readable text format.
+- `json`: Outputs the query plan in JSON format, which can be easily parsed by other programs.
+- `xml`: Outputs the query plan in XML format.
+- `yaml`: Outputs the query plan in YAML format.
+- `csv`: Outputs the query plan in CSV format.
+
+```sql
+EXPLAIN (FORMAT json) SELECT * FROM users WHERE name = 'John';
+```
+
+**Note:** Using `json` format gives you a nice look
+
+The website [https://explain.depesz.com/](https://explain.depesz.com/) is a good resource for formatting/presenting your query plans in an easily understood way.
+
+
+### 13.2. Dropping Data with TRUNCATE
+
+In PostgreSQL, the `TRUNCATE` command is used to quickly and efficiently remove all data from a table. Unlike the `DELETE` command, which deletes data one row at a time, `TRUNCATE` removes all data by deallocating the storage space associated with the table. This makes `TRUNCATE` much faster than `DELETE`, especially for large tables.
+
+```sql
+TRUNCATE table_name;
+```
+This will remove all data from the table named "table_name".
+
+**Note:** `TRUNCATE` cannot be used on a table that is a parent of a foreign key relationship and also it can't be used with views.
+
+Additionally, `TRUNCATE` command also reset the auto-increment serial number to start from 1.
+
+```sql
+TRUNCATE table_name RESTART IDENTITY;
+```
+This will reset the auto-increment serial number to start from 1.
+
+The `TRUNCATE` command with the `CASCADE` option in PostgreSQL will not only remove all data from the specified table, but it will also remove all data from any child tables that have a foreign key relationship with the truncated table.
+
+```sql
+TRUNCATE orders CASCADE;
+```
+This will remove all data from the "orders" table and also remove all data from the "order_items" table that have a foreign key relationship with the "orders" table.
+
+
+### 13.3. Exporting and Importing Data with COPY
+
+Exporting and importing data with `COPY` in postgresql allows for the efficient transfer of data between different databases or between a database and a file. The `COPY` command can be used to export data from a table or query results to a file, and to import data from a file into a table.
+
+**Note:** `INSERT` operations might be preferred for incremental operations, but are slow for bulk operations. Instead, we can use the `COPY` command.
+
+```sql
+COPY (SELECT * FROM employees) TO '/tmp/employees.csv' WITH CSV;
+```
+This command exports all data from the "employees" table to a CSV file located in the "/tmp" directory.
+
+```sql
+COPY employees FROM '/tmp/employees.csv' WITH CSV;
+```
+This command imports data from a CSV file located in the "/tmp" directory into the "employees" table.
+
+Example of exporting and importing data from a table to a file with specific delimiter and header options:
+
+```sql
+COPY (SELECT * FROM sales) TO '/tmp/sales.csv' WITH DELIMITER ',' CSV HEADER;
+
+COPY sales FROM '/tmp/sales.csv' WITH DELIMITER ',' CSV HEADER;
+```
+
+It is important to note that the `COPY` command can only be used with tables and files located on the same server as the database. If data needs to be transferred between servers, the `pg_dump` and `pg_restore` commands should be used instead.
+
+
+### 13.4. Arrays and Array Functions
+
+Arrays in PostgreSQL are used to store multiple values of the same data type in a single column. They can be used for storing lists, sets, or other types of collections of data. Array functions in PostgreSQL allow for manipulating and querying arrays in various ways.
+
+For example, the `array_length` function can be used to find the number of elements in an array:
+```sql
+SELECT array_length(ARRAY[1,2,3,4,5],1);
+
+-- Output: 5
+```
+
+The `array_append` function can be used to add an element to the end of an array:
+```sql
+SELECT array_append(ARRAY[1,2,3],4);
+
+-- output: [1,2,3,4]
+```
+
+The `array_remove` function can be used to remove an element from an array:
+```sql
+SELECT array_remove(ARRAY[1,2,3,4],2);
+
+-- Output: [1,3,4]
+```
+
+The `array_agg` function can be used to aggregate multiple values into an array:
+```sql
+SELECT array_agg(name) FROM employees;
+```
+This will return an array containing all of the names from the "employees" table.
+
+There are array-specific operators that can come in handy:
+- `@>` → Contains
+- `<@` → Is contained by
+- `&&` → Overlaps
+- `||` → Element or array concatenation
+- `array_name[n]` → Access nth element of array
+
+Check the documentation for more information on array functions:
+https://www.postgresql.org/docs/current/functions-array.html
+
+
+### 13.5. JSON and JSON Functions
+
+In PostgreSQL, JSON data can be stored in a column with a data type of json or jsonb (binary JSON). The jsonb data type is more efficient for indexing and searching, but the json data type is more flexible for storing data in a human-readable format.
+
+PostgreSQL provides several built-in functions for working with JSON data. Some of the most commonly used JSON functions are:
+
+- `json_object`: Creates a JSON object from a set of key-value pairs.
+     
+   ```sql
+   json_object('name'::text, 'John'::text, 'age'::text, 30::int)
+   
+   -- Output: {"name":"John","age":30}
+   ```
+
+- `json_array`: Creates a JSON array from a set of values. 
+
+    ```sql
+    json_array(1, 2, 3)
+
+    -- Output: [1,2,3]
+    ```
+
+- `json_extract_path`: Extracts a specific value from a JSON object.
+
+    ```sql
+    json_extract_path('{"name":"John","age":30}'::json, 'name')
+
+    -- Output: "John"
+    ```
+
+- `json_array_length`: Returns the number of elements in a JSON array.
+
+    ```sql
+    json_array_length('[1,2,3]'::json)
+
+    -- Output: 3
+    ```
+
+- `jsonb_set`: Modifies a specific value in a JSON object.
+    
+    ```sql
+    jsonb_set('{"name":"John","age":30}'::jsonb, '{name}', 'Jane')
+
+    -- Output: {"name":"Jane","age":30}.
+    ```
+
+There are JSON-specific operators in Postgres:
+- `->int` → Get array element
+- `->>int` → Get array element as text
+- `->text` → Get JSON object field by key
+- `->>text` → Get JSON object field by key as text
+- `#>text[]` → Get JSON object at path
+- `#>>text[]` → Get JSON object at path as text
+
+Check the documentation for more information on json functions:
+https://www.postgresql.org/docs/9.5/functions-json.html
