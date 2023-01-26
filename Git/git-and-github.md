@@ -66,6 +66,9 @@
   - [12.2. Reflog References](#122-reflog-references)
   - [12.3. Timed References](#123-timed-references)
   - [12.4. Rescuing Lost Commits](#124-rescuing-lost-commits)
+- [13. Useful Methods and Tools](#13-useful-methods-and-tools)
+  - [13.1. Writing Custom Git Aliases](#131-writing-custom-git-aliases)
+  - [13.2. Combine Git Repositories](#132-combine-git-repositories)
 
 
 <br>
@@ -1067,3 +1070,73 @@ git reset 9fceb02
 <br>
 
 ****************
+## 13. Useful Methods and Tools
+
+### 13.1. Writing Custom Git Aliases
+
+Git aliases are shortcuts that allow you to create custom command names for commonly used Git commands. They can be set up in the Git configuration file, located at `~/.gitconfig` or `.git/config` in your project directory.
+
+To create a new alias, you can use the `git config` command followed by the `alias.<new_alias_name>` key, and the command you want to use.
+
+For example, if you want to create an alias for the command `git status -s` which shows a short status of the repository, you can use the following command:
+
+```bash
+git config --global alias.st status -s
+```
+
+Now, you can use `git st` instead of `git status -s` in your command line.
+Another example, if you want to create an alias for the command `git log --graph --decorate --oneline` which shows a graph of your commit history in one line, you can use the following command:
+
+```bash
+git config --global alias.glog log --graph --decorate --oneline
+```
+
+You can also chain multiple commands together using an alias, for example,
+
+```bash
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.last '!git co - && git br -v'
+```
+
+Now, you can use `git last` instead of `git co - && git br -v` in your command line to check out the last branch you were working on and list all branches with their upstreams and current status.
+
+**Note:** Aliases are local to a specific repository, so if you want to make an alias available across all of your projects, you should use the `--global` option when setting the alias.
+
+Here are some links that may be helpful for setting up Git aliases:
+- https://www.durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
+- https://gist.github.com/mwhite/6887990
+- https://github.com/GitAlias/gitalias
+
+
+### 13.2. Combine Git Repositories
+
+To combine two Git repositories, you can use the `git merge` command. Here is the basic process:
+
+1. Clone the repository you want to merge into a new directory:
+    ```bash
+    git clone <repo-to-merge-into>
+    cd <repo-to-merge-into>
+    ```
+2. Add the other repository as a remote:
+    ```bash
+    git remote add <remote-name> <repo-to-merge-from>
+    ```
+3. Fetch the commits from the other repository:
+    ```bash
+    git fetch <remote-name>
+    ```
+4. Merge the commits from the other repository into your repository:
+    ```bash
+    git merge <remote-name>/<branch-to-merge>
+    ```
+
+This will create a new commit in your repository that brings in the changes from the other repository.
+
+If you want to keep the entire commit history from the other repository, you can use the `--allow-unrelated-histories` flag when you run the `git merge` command. This will allow Git to merge two repositories that have completely separate histories, rather than requiring them to have a common ancestor.
+
+```bash
+git merge --allow-unrelated-histories <remote-name>/<branch-to-merge>
+```
+
+Note that this process will only work if the two repositories do not have any conflicting changes. If the repositories have conflicting changes, you will need to resolve the conflicts manually before the merge can be completed.
