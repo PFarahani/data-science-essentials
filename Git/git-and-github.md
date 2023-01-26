@@ -61,6 +61,11 @@
     - [11.5.2. Blob](#1152-blob)
     - [11.5.3. Tree](#1153-tree)
     - [11.5.4. Commits](#1154-commits)
+- [12. Reflogs](#12-reflogs)
+  - [12.1. The Git Reflog Show Command](#121-the-git-reflog-show-command)
+  - [12.2. Reflog References](#122-reflog-references)
+  - [12.3. Timed References](#123-timed-references)
+  - [12.4. Rescuing Lost Commits](#124-rescuing-lost-commits)
 
 
 <br>
@@ -967,6 +972,95 @@ Commit objects combine a tree object along with information about the context th
 > This is my commit message
 
 When we run `git commit`, Git creates a new commit object whose parent is the current HEAD commit and whose tree is the current content of the index.
+
+
+<br>
+<br>
+
+****************
+## 12. Reflogs
+
+Git keeps a record of when the tips of branches and other references were updated in the repo. Git reflog is a feature in Git that keeps track of all changes made to the local repository's references. It is a local mechanism that allows you to recover lost commits and branches, as well as undo commits that haven't been pushed yet. The reflog is stored in the `.git/logs` directory, and can be accessed using the command `git reflog`.
+
+**Note:** Git only keeps reflogs on your <u>local</u> activity and they are not shared with collaborators. Also, Git cleans out old Reflog entries after around 90 days, though this can be configured.
+
+### 12.1. The Git Reflog Show Command
+
+The git reflog command accepts subcommands `show`, `expire`, `delete`, and `exists`. `git reflog show` is the only commonly used variant, and it is the default subcommand. `git reflog show` will show the log of a specific reference (it defaults to HEAD). For example, to view the logs for the tip of the main branch we could run `git reflog show main`.
+
+```bash
+git reflog show HEAD
+```
+
+> HEAD@{0}: commit: fix some bug
+> 
+> HEAD@{1}: checkout: moving from main to bugfix9
+> 
+> HEAD@{2}: commit: another commit yay
+> 
+> HEAD@{3}: commit: add some feature 
+>
+> ...
+>
+> HEAD@{21}: clone: from https://github.com/facebook/react.git
+
+### 12.2. Reflog References
+
+We can access specific git refs using `name@{qualifier}`. We can use this syntax to access specific ref pointers and can pass them to other commands including `checkout`, `reset`, and `merge`.
+
+```bash
+git Checkout HEAD@{2}
+
+git diff main@{4} main@{6}
+```
+
+### 12.3. Timed References
+
+Every entry in the reference logs has a timestamp associated with it. We can filter reflogs entries by time/date by using time qualifiers like:
+- 1.day.ago
+- 3.minutes.ago
+- yesterday
+- Fri, 12 Feb 2021 14:06:21 -0800
+
+```bash
+git reflog master@{one.week.ago}
+
+git checkout bugfix@{2.days.ago}
+
+git diff main@{0} main@{yesterday}
+```
+
+### 12.4. Rescuing Lost Commits
+
+If you accidentally delete a branch, you can use the reflog to recover it by finding the commit hash associated with the branch and creating a new branch pointing to that commit.
+
+```bash
+git reflog
+```
+> ...
+> 
+> 9fceb02 HEAD@{2}: branch: deleted develop
+> 
+> ...
+
+```bash
+git branch recover 9fceb02
+```
+
+Another example, if you want to undo a commit that you haven't pushed yet, you can use the reflog to find the commit hash, and then use the `git reset` command to move the HEAD pointer to that commit.
+
+```bash
+git reflog
+```
+> ...
+> 
+> 9fceb02 HEAD@{2}: commit: Fixed bug in feature X
+> 
+>...
+
+```bash
+git reset 9fceb02
+```
 
 
 <br>
