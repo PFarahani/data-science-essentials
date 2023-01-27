@@ -1,6 +1,6 @@
 # Course Summaries
-This repo contains a summary of all the materials covered in the courses I took which might someday come in handy
 
+This repository contains a collection of summaries and cheat sheets for various courses and subjects, including machine learning, data science, and software tutorials.
 
 ## Table of contents
 
@@ -19,5 +19,6 @@ This repo contains a summary of all the materials covered in the courses I took 
   - [Git \& GitHub](Git/git-and-github.md)
   - [Git Commands Summary](Git/git-summary.md)
 
-- [Ubuntu](Ubuntu/)
-  - [Ubuntu Server Administration Basics](Ubuntu/ubuntu-server-administration-basics.md)
+- [Linux and Unix](Linux%20and%20Unix/)
+  - [Linux Commands and Shell Scripting](Linux%20and%20Unix/linux-commands-and-shell-scripting.md)
+  - [Ubuntu Server Administration Basics](Linux%20and%20Unix/ubuntu-server-administration-basics.md)
