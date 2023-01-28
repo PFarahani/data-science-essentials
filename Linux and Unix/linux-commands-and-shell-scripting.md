@@ -20,6 +20,10 @@
   - [3.1. Filters, Pipes, and Variables](#31-filters-pipes-and-variables)
   - [3.2. Useful Features of the Bash Shell](#32-useful-features-of-the-bash-shell)
   - [3.3. Scheduling Jobs Using Cron](#33-scheduling-jobs-using-cron)
+- [4. Examples](#4-examples)
+  - [4.1. Example 1](#41-example-1)
+  - [4.2. Example 2](#42-example-2)
+  - [4.3. Example 3](#43-example-3)
 
 
 <br>
@@ -434,7 +438,7 @@ Bash has two main modes of operation:
   command1; command2
   # Command 2 only runs after command 1 is completed
   ```
-2. In concurrent mode, commands run in parallel.
+1. In concurrent mode, commands run in parallel.
   ```sh
   command1 & command2
   # Command 2 only runs after command 1 is completed
@@ -468,4 +472,188 @@ crontab -l | tail -6
 #
 # 0 0 * * * /cron_scripts/load_data.sh
 # 0 2 * * * /cron_scripts/backup_data.sh
+```
+
+
+<br>
+<br>
+
+****************
+## 4. Examples
+
+### 4.1. Example 1
+
+Let's start with a commonly used example.
+
+- `sort`: sorts lines in input
+- `uniq`: prints input with consecutive repeated lines collapsed to a single, unique line
+
+With the help of the pipe operator, we can combine these commands to print all the unique lines in a file!
+
+Suppose we have the file pets.txt with the following contents:
+
+```sh
+cat pets.txt
+# goldfish
+# dog
+# cat
+# parrot
+# dog
+# goldfish
+# goldfish
+```
+If we only use sort on pets.txt, we get:
+
+```sh
+sort pets.txt
+# cat
+# dog
+# dog
+# goldfish
+# goldfish
+# goldfish
+# parrot
+```
+And if we only use uniq, we get:
+
+```sh
+uniq pets.txt
+# goldfish
+# dog
+# cat
+# parrot
+# dog
+# goldfish
+```
+But by combining the two commands in the correct order, we get back:
+
+```sh
+sort pets.txt | uniq
+# cat
+# dog
+# goldfish
+# parrot
+```
+which are the sorted, unique lines from pets.txt!
+
+### 4.2. Example 2
+
+Some commands, such as `tr`, only accept "standard input" as input (not strings or filenames):
+
+- `tr` (translate) → replaces characters in input text.
+  ```
+  Syntax: tr [OPTIONS] [target characters] [replacement characters]
+  In cases like this, we can use piping to apply the command to strings and file contents.
+  ```
+
+With strings, we could, for example, use `echo` in combination with `tr` to replace all vowels in a string with underscores, as follows:
+
+```sh
+$ echo "Linux and shell scripting are awesome\!" | tr "aeiou" "_"
+# L_n_x _nd sh_ll scr_pt_ng _r_ _w_s_m_!
+```
+To perform the complement of the operation from the previous example, that is, to replace all consonants with an underscore, we can use the `-c` option like this:
+
+```sh
+$ echo "Linux and shell scripting are awesome\!" | tr -c "aeiou" "_"
+# _i_u__a_____e______i__i___a_e_a_e_o_e_
+```
+With files, we could use `cat` in combination with `tr` to change all of the text to upper case as follows:
+
+```sh
+cat pets.txt | tr "[a-z]" "[A-Z]"
+# GOLDFISH
+# DOG
+# CAT
+# PARROT
+# DOG
+# GOLDFISH
+# GOLDFISH
+```
+
+The possibilities are endless! For example:
+
+```sh
+sort pets.txt | uniq | tr "[a-z]" "[A-Z]"
+# CAT
+# DOG
+# GOLDFISH
+# PARROT
+```
+
+### 4.3. Example 3
+
+We can even use `curl` in combination with the `grep` command to extract components of URL data by piping the output of curl to grep.
+Let's see how we can use this pattern to get the current price of BTC (Bitcoin) in USD.
+
+First, we find a public URL API. In this example, we will use one provided by CoinStats.
+
+Specifically, they provide a public API (no key required) https://api.coinstats.app/public/v1/coins/bitcoin\?currency\=USD which returns some json about the current BTC price in USD.
+
+Entering the following command returns the BTC price data, displayed as a json object:
+
+```sh
+curl -s --location --request GET https://api.coinstats.app/public/v1/coins/bitcoin\?currency\=USD
+
+```
+
+```json
+{
+  "coin": {
+    "id": "bitcoin",
+    "icon": "https://static.coinstats.app/coins/Bitcoin6l39t.png",
+    "name": "Bitcoin",
+    "symbol": "BTC",
+    "rank": 1,
+    "price": 57907.78008618953,
+    "priceBtc": 1,
+    "volume": 48430621052.9856,
+    "marketCap": 1093175428640.1146,
+    "availableSupply": 18877868,
+    "totalSupply": 21000000,
+    "priceChange1h": -0.19,
+    "priceChange1d": -0.4,
+    "priceChange1w": -9.36,
+    "websiteUrl": "http://www.bitcoin.org",
+    "twitterUrl": "https://twitter.com/bitcoin",
+    "exp": [
+      "https://blockchair.com/bitcoin/",
+      "https://btc.com/",
+      "https://btc.tokenview.com/"
+    ]
+  }
+}
+```
+
+The json field we want to grab here is "price": [numbers].[numbers]". To grab this we can use the following `grep` command to extract it from the json text:
+
+```sh
+grep -oE "\"price\"\s*:\s*[0-9]*?\.[0-9]*"
+```
+
+- `-o` tells `grep` to only return the matching portion
+- `-E` tells `grep` to be able to use extended regex symbols such as `?`
+- `\"price\"` matches the string `"price`"
+- `\s*` matches any number (including 0) of whitespace (`\s`) characters
+- `:` matches `:`
+- `[0-9]*` matches any number of digits (from 0 to 9)
+- `?\.` optionally matches a `.` (this is in case price were an integer)
+
+Now that we have the grep statement that we need, we can pipe the BTC data to it using the curl command from above:
+
+```sh
+$ curl -s --location --request GET https://api.coinstats.app/public/v1/coins/bitcoin\?currency\=USD |\ grep -oE "\"price\":\s*[0-9]*?\.[0-9]*"
+
+# "price": 57907.78008618953
+```
+The backslash `\` character used here after the pipe `|` allows us to write the expression on multiple lines.
+
+Finally, to get only the value in the price field, and drop the "price" label, we can use chaining to pipe the same output to another grep:
+
+```sh
+$ curl -s --location --request GET https://api.coinstats.app/public/v1/coins/bitcoin\?currency\=USD |\
+    grep -oE "\"price\":\s*[0-9]*?\.[0-9]*" |\
+    grep -oE "[0-9]*?\.[0-9]*"
+
+# 57907.78008618953
 ```
