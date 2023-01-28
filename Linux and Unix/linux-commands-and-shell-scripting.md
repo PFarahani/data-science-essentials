@@ -16,6 +16,10 @@
   - [2.5. Customizing View of File Contents](#25-customizing-view-of-file-contents)
   - [2.6. File Archiving and Compression Commands](#26-file-archiving-and-compression-commands)
   - [2.7. Networking Commands](#27-networking-commands)
+- [3. Introduction to Shell Scripting](#3-introduction-to-shell-scripting)
+  - [3.1. Filters, Pipes, and Variables](#31-filters-pipes-and-variables)
+  - [3.2. Useful Features of the Bash Shell](#32-useful-features-of-the-bash-shell)
+  - [3.3. Scheduling Jobs Using Cron](#33-scheduling-jobs-using-cron)
 
 
 <br>
@@ -281,3 +285,187 @@ Networking applications include the following:
   curl www.google.com -o google.txt
   ```
 - `wget` → command can be used to download a file from a URL
+
+
+<br>
+<br>
+
+****************
+## 3. Introduction to Shell Scripting
+
+A shell script is an executable text file with an interpreter directive aka "shebang" directive which has the following form:
+
+```sh
+#!/path/to/executable/program [optional-arg]
+```
+
+For example:
+
+Shell script directives:
+
+```sh
+#!/bin/sh
+#!/bin/bash
+```
+
+Python script directive:
+
+```sh
+#!/usr/bin/env python3
+```
+
+### 3.1. Filters, Pipes, and Variables
+
+Filters are shell commands, which transform input data into output data. Examples are `wc`, `cat`, `more`, `head`, `sort`, ect.
+
+Filters can be chained together using pipe command:
+```sh
+command1 | command2
+
+# Output of command1 is input of command2
+``` 
+
+```sh
+ls | sort -r
+
+# Sorts the directory contents in reverse order
+```
+
+Shell variables are limited to the shell and accordingly, shells cannot see eachother's variables. To define a shell variables simply use `=` (without spaces around it)
+
+```sh
+# Define variable
+var1="Hello"
+var2="World"
+
+# To view the variables's value
+echo $var1
+echo $var1 $var2
+
+# To clear a variable
+unset var2
+
+# List all shell variables
+set | head -4
+```
+
+Environment variables are just like shell variables except they have extended scope. They persist in any child processes spawned by the shell in which they originate. We can extend any shell variable to environment variable by applying `export` command to it.
+```sh
+# Extend scope
+export var1
+
+# List all environment variables
+env
+```
+
+### 3.2. Useful Features of the Bash Shell
+
+Metacharacters are special characters that have meaning to the shell.
+- `#` include comments, which are ignored by the shell
+- `;` separate commands typed on the same line
+- `*` represent any number of consecutive characters within a filename pattern
+- `?` acts as a single-character version of the asterisk metacharacter
+  ```sh
+  ls /bin/?ash
+  # /bin/Bash   /bin/dash
+  ```
+
+Quoting is used to specify whether the shell should interpret special characters as metacharacters, or "escape" them.
+- `\` escape interpretation of a single character as a metacharacter
+  ```sh
+  echo "\$1 each"
+  # $1 each
+  ```
+- `" "` interpret text literally, except for any metacharacters, which will be interpreted according to their special meanings
+  ```sh
+  echo "\$1 each"
+  #  each
+  # Notice that the above command printed an extra space
+  ```
+- `' '` interpret all contents as literal characters
+  ```sh
+  echo "\$1 each"
+  # &1 each
+  ```
+
+Input/Output, or I/O redirection refers to a set of features used for redirecting either the standard input, which is the keyboard, or the standard output, which is the terminal.
+- `>` redirect standard output of a command to a file. It also creates the file if it doesn't exist, and overwrites its contents if it already exists
+- `>>` avoid overwriting by appending output to any existing content
+- `2>` redirects an error message to a file
+- `2>>` append the error message
+- `<` pass file contents as input to the standard input
+  ```sh
+  echo "line1" > eg.txt
+  cat eg.txt
+  # line1
+  echo "line2" >> eg.txt
+  cat eg.txt
+  # line1
+  # line2
+  
+  garbage
+  # garbage: command not found
+  garbage 2> err.txt
+  cat err.txt
+  # garbage: command not found
+  ```
+
+We can use command substitution when we want to replace a command with its output. There are two equivalent notations:
+1. $(command)
+2. 'command'
+
+For example, let's say we want to store the `pwd` in a variable called "here": 
+```sh
+here=$(pwd)
+echo $here
+# /home/me
+```
+
+Command line arguments are arguments used by a program that are specified on the command line. In particular, they provide a way to pass arguments to a shell script, which is itself a program. Command line arguments for a Bash script are specified like this:
+```sh
+./MyBashScript.sh arg1 arg2
+```
+Here, the arguments "arg1" and "arg2" are passed to "MyBashScript.sh".
+
+Bash has two main modes of operation:
+
+1. Batch mode, which is the usual mode, runs commands sequentially.
+  ```sh
+  command1; command2
+  # Command 2 only runs after command 1 is completed
+  ```
+2. In concurrent mode, commands run in parallel.
+  ```sh
+  command1 & command2
+  # Command 2 only runs after command 1 is completed
+  ```
+
+### 3.3. Scheduling Jobs Using Cron
+
+Cron is the general name of the tool that runs scheduled jobs consisting of shell commands or shell scripts. "Crond" is the daemon or service that interprets "crontab files" every minute and submits the corresponding jobs to cron at scheduled times. A "crontab", is a file containing jobs and schedule data. 
+
+`crontab` is also a command that invokes a text editor to allow us to edit a crontab file.
+```sh
+# Open the default text editor
+crontab -e
+```
+Using the editor, we can specify a new schedule and a command, which has the following syntax:
+```
+m h dom mon dow command
+```
+
+For example, the following syntax means: append the current date to the file "sundays.txt" at 15:30 every Sunday.
+
+```sh
+30 15 * * 0 date >> sundays.txt
+```
+
+```sh
+# List cronjobs and their schedules
+crontab -l | tail -6
+
+# m h dom mon dow command
+#
+# 0 0 * * * /cron_scripts/load_data.sh
+# 0 2 * * * /cron_scripts/backup_data.sh
+```
