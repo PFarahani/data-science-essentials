@@ -20,6 +20,12 @@
   - [3.1. Filters, Pipes, and Variables](#31-filters-pipes-and-variables)
   - [3.2. Useful Features of the Bash Shell](#32-useful-features-of-the-bash-shell)
   - [3.3. Scheduling Jobs Using Cron](#33-scheduling-jobs-using-cron)
+  - [3.4. Conditionals](#34-conditionals)
+    - [3.4.1. If](#341-if)
+    - [3.4.2. If-Else](#342-if-else)
+    - [3.4.3. Elif](#343-elif)
+    - [3.4.4. Nested Ifs](#344-nested-ifs)
+    - [3.4.5. test](#345-test)
 - [4. Examples](#4-examples)
   - [4.1. Example 1](#41-example-1)
   - [4.2. Example 2](#42-example-2)
@@ -491,6 +497,136 @@ crontab -l | tail -6
 # 0 0 * * * /cron_scripts/load_data.sh
 # 0 2 * * * /cron_scripts/backup_data.sh
 ```
+
+### 3.4. Conditionals
+
+Conditionals are ways of telling a script to do something under specific condition(s) using `if else`.
+
+#### 3.4.1. If
+
+```sh
+cat if_example.sh
+# a=1
+# b=2
+if [ $a -lt $b ]
+then
+    echo "a is less than b"
+fi
+```
+
+> ```sh
+> $ sh if_example.sh  # sh tells the terminal to run the script if_example.sh using the default shell
+> a is less than b
+> ```
+
+**Note:** You must always put spaces around your conditions in the `[ ]`.
+**Note:** Every `if` condition block must be paired with a `fi`.
+
+#### 3.4.2. If-Else
+
+```sh
+cat if_else_example.sh
+# a=3
+# b=2
+if [ $a -lt $b ]
+then
+    echo "a is less than b"
+else
+    echo "a is greater than or equal to b"
+fi
+```
+
+> ```sh
+> $ sh if_else_example.sh
+> a is greater than or equal to b
+> ```
+
+**Note:** You don't use `then` for `else` cases.
+
+#### 3.4.3. Elif
+
+```sh
+cat elif_example.sh
+# a=2
+# b=2
+if [ $a -lt $b ]
+then
+    echo "a is less than b"
+elif [ $a == $b ]
+then
+    echo "a is equal to b"
+else # Here a is not <= b, so a > b
+    echo "a is greater than b"
+fi
+```
+
+> ```sh
+> $ sh elif_example.sh
+> a is equal to b
+> ```
+
+#### 3.4.4. Nested Ifs
+
+```sh
+cat nested_ifs_example.sh
+# a=3
+# b=3
+# c=3
+if [ $a == $b ]
+then
+    if [ $a == $c ]
+    then
+        if [ $b == $c ]
+        then
+            echo "a, b, and c are equal"
+        fi
+    fi
+else
+    echo "the three variables are not equal"
+fi
+```
+
+> ```sh
+> $ sh nested_ifs_example.sh
+> a, b, and c are equal
+> ```
+
+Alternatively, this example could have been simplified to a single if-statement:
+
+```sh
+# a=3
+# b=3
+# c=3
+if [ $a == $b ] && [ $a == $c ] && [ $b == $c ]
+then
+    echo "a, b, and c are equal"
+else
+    echo "the three variables are not equal"
+fi
+```
+
+**Note:** `&&` means "and"
+
+#### 3.4.5. test
+
+Sometimes, instead of using brackets around conditions, you'll see the `test` command in use:
+
+```sh
+cat test_example.sh
+# a=1
+# b=2
+if test $a -lt $b
+then
+    echo "a is less than b"
+fi
+```
+
+> ```sh
+> $ sh test_example.sh
+> a is less than b
+> ```
+
+`test` and `[ ]` are the same command. We encourage using `[ ]` instead as it's more readable.
 
 
 <br>
