@@ -18,6 +18,7 @@
   - [2.2. An Introduction to Data Pipelines](#22-an-introduction-to-data-pipelines)
   - [2.3. Key Data Pipeline Processes](#23-key-data-pipeline-processes)
   - [2.4. Batch VS Streaming Data Pipelines Use Cases](#24-batch-vs-streaming-data-pipelines-use-cases)
+- [3. Apache Airflow](#3-apache-airflow)
 
 
 
@@ -373,3 +374,39 @@ but speed is also important. We usually choose a Lambda architecture we are aimi
 <br>
 
 ****************
+
+## 3. Apache Airflow
+
+1. **Apache Airflow Overview**
+   - Apache Airflow is a platform for programmatically authoring, scheduling, and monitoring workflows.
+   - Workflows are represented as Directed Acyclic Graphs (DAGs) consisting of tasks with dependencies.
+   - Airflow is not a data streaming solution but primarily a workflow manager.
+   - Key features include automated data pipeline creation, ease of use with rule recommendations and drag-and-drop GUI, transformation support, and security and compliance features.
+   - Popular tools and libraries for building data pipelines include Pandas, Dask, Vaex, Apache Spark, and PostgreSQL.
+   - Examples of Airflow-related tools are Apache Airflow, Talend Open Studio, AWS Glue, Panoply, Alteryx, IBM InfoSphere DataStage, and IBM Streams.
+
+2. **Advantages of Representing Data Pipelines as DAGs in Airflow**
+   - DAGs are directed acyclic graphs used to represent workflows in Airflow.
+   - DAGs define tasks and their dependencies, specifying the order of execution.
+   - DAGs are defined as Python scripts that instantiate DAG objects and define tasks using operators.
+   - Airflow Scheduler handles the execution of tasks on workers based on the specified dependencies.
+   - Advantages of representing workflows as DAGs include scalability, dynamism, extensibility, and maintainability.
+
+3. **Apache Airflow UI**
+   - The Airflow User Interface provides a comprehensive view of DAGs, tasks, and their statuses.
+   - DAGs can be visualized in different ways, such as tree view and graph view.
+   - The UI allows for task instance selection, code review, and task duration analysis.
+   - Airflow UI simplifies monitoring, scheduling, and management of workflows, making it user-friendly and collaborative.
+
+4. **Build a DAG Using Airflow**
+   - Airflow DAGs are defined as Python scripts with logical blocks: library imports, DAG arguments, DAG definition, task definitions, and task pipeline.
+   - Tasks are instantiated using operators such as Bash Operator, Python Operator, and SQL Operator.
+   - Dependencies between tasks are specified using the '>>' notation, defining the order of task execution.
+   - DAGs can have a schedule interval for repeated execution.
+
+5. **Airflow Logging and Monitoring**
+   - Airflow provides logging capabilities for monitoring task status and diagnosing issues.
+   - Log files are stored locally, and for production deployments, they can be sent to cloud storage or search engines like Elasticsearch and Splunk.
+   - Airflow UI allows for easy access and review of task events.
+   - Metrics, including counters, gauges, and timers, are produced to monitor component health.
+   - Metrics should be sent to dedicated repositories like Prometheus via StatsD for monitoring and analysis.
