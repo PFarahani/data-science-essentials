@@ -13,6 +13,12 @@
   - [1.3. Data Transformation Techniques](#13-data-transformation-techniques)
   - [1.4. Data Loading Techniques](#14-data-loading-techniques)
   - [1.5. ETL Tools](#15-etl-tools)
+- [2. ETL \& Data Pipelines: Tools and Techniques](#2-etl--data-pipelines-tools-and-techniques)
+  - [2.1. ETL Using Shell Scripts](#21-etl-using-shell-scripts)
+  - [2.2. An Introduction to Data Pipelines](#22-an-introduction-to-data-pipelines)
+  - [2.3. Key Data Pipeline Processes](#23-key-data-pipeline-processes)
+  - [2.4. Batch VS Streaming Data Pipelines Use Cases](#24-batch-vs-streaming-data-pipelines-use-cases)
+
 
 
 <br>
@@ -203,6 +209,164 @@ IBM Streams:
 | Alteryx                  | Proprietary       | Limited     | Moderate    | Various          | Yes                 | Yes          | No                   | Paid |
 | IBM InfoSphere DataStage | Proprietary       | Scalable    | High        | Various          | Yes                 | Yes          | No                   | Paid |
 
+
+
+<br>
+<br>
+
+****************
+
+## 2. ETL & Data Pipelines: Tools and Techniques
+
+### 2.1. ETL Using Shell Scripts
+
+```bash
+#!/bin/bash
+
+# Step 1: Extract - Fetch data from a source
+
+# Assuming the data source is a log file named 'source.log'
+source_file="source.log"
+
+# Step 2: Transform - Perform transformations on the data
+
+# Assuming the transformation involves filtering and extracting specific lines
+transformed_file="transformed.txt"
+grep "ERROR" "$source_file" | awk '{print $2, $3}' > "$transformed_file"
+
+# Step 3: Load - Load the transformed data into a target
+
+# Assuming the target is a PostgreSQL database
+database_name="mydatabase"
+table_name="mytable"
+
+# Assuming you have PostgreSQL command line client installed and configured
+psql -U username -d "$database_name" <<EOF
+CREATE TABLE IF NOT EXISTS $table_name (
+  timestamp timestamp,
+  message text
+);
+
+\copy $table_name FROM '$transformed_file' WITH (FORMAT csv, DELIMITER ' ');
+
+EOF
+
+# Step 4: Cleanup - Remove temporary files
+
+rm "$transformed_file"
+```
+
+In this example, we follow the ETL process, but with an added pipeline between the transformation and loading steps. Here's a breakdown of the script:
+
+1. **Extract**: The script assumes that the data is stored in a log file named 'source.log'.
+
+2. **Transform**: The script uses the 'grep' command to filter out lines containing "ERROR" from the source log file. Then, it uses the 'awk' command to extract the second and third columns (assuming they contain the timestamp and the log message, respectively). The transformed data is saved to 'transformed.txt'.
+
+3. **Load**: The transformed data is loaded into a PostgreSQL database. The script uses the 'psql' command to connect to the database and execute SQL statements. First, it creates a table if it doesn't already exist. Then, it uses the '\copy' command to load the transformed data from the text file into the specified table.
+
+4. **Cleanup**: Finally, the script removes the temporary file 'transformed.txt'.
+
+
+To schedule the script to run at specific intervals, you can use the cron job. Follow these steps:
+
+1. Open the terminal and run the command `crontab -e` to open the crontab file.
+
+2. Add the following line to the crontab file to schedule the script to run, for example, every day at 2 AM:
+
+   ```bash
+   0 2 * * * /path/to/your/script.sh
+   ```
+
+   Make sure to replace `/path/to/your/script.sh` with the actual path to your shell script.
+
+3. Save the crontab file and exit the editor.
+
+The cron job will now execute the script according to the specified schedule. You can modify the cron schedule to suit your specific requirements. For more advanced scheduling options, you can refer to the cron syntax documentation.
+
+### 2.2. An Introduction to Data Pipelines 
+
+A data pipeline is a sequential set of connected processes where the output of one process serves as the input for the next process. Data pipelines specifically focus on moving or modifying data from one place or form to another.
+
+**Data Pipeline Performance**: Two key performance considerations in data pipelines are:
+   - **Latency**: The total time it takes for a single data packet to pass through the pipeline, which is determined by the cumulative time spent in each processing stage. Latency is limited by the slowest process in the pipeline.
+   - **Throughput**: The amount of data that can be processed and fed through the pipeline per unit of time. Increasing the size of data packets processed within a given time period enhances throughput.
+
+**Data Pipeline Use Cases**:
+   - Copying data from one location to another, such as in file backups.
+   - Integrating disparate raw data sources into a data lake.
+   - Moving transactional records to a data warehouse.
+   - Streaming data from IoT devices for real-time monitoring or alerting systems.
+   - Preparing raw data for machine learning development or production.
+   - Sending and receiving messages, such as email, SMS, or online video meetings.
+
+
+### 2.3. Key Data Pipeline Processes
+
+Stages of data pipeline processes:
+
+- **Extraction:** Data is extracted from one or more data sources.
+- **Ingestion:** Extracted data is ingested into the pipeline.
+- **Transformation:** Optional stages within the pipeline where data can be transformed.
+- **Loading:** Final loading of the transformed data into a destination facility.
+- **Scheduling and Triggering:** Mechanisms for scheduling or triggering the execution of pipeline jobs.
+- **Monitoring:** Continuous monitoring of the data pipeline's workflow to ensure data integrity.
+- **Maintenance and Optimization:** Regular maintenance and optimization activities to keep the pipeline running smoothly.
+
+
+Some data pipeline monitoring considerations:
+
+- **Latency**: Monitoring the time it takes for data packets to flow through the pipeline.
+- **Throughput Demand**: Monitoring the volume of data passing through the pipeline over time.
+- **Errors and Failures**: Monitoring for errors and failures caused by factors such as network overloading or system failures.
+- **Utilization Rate**: Monitoring the utilization of pipeline resources to optimize cost.
+- **Event Logging and Alerting**: Implementing a system to log events and alert administrators in case of failures.
+
+
+Handling unbalanced loads:
+
+- **Load Balancing**: Ideally, all stages of the pipeline should take the same amount of time to process a packet, avoiding bottlenecks and ensuring load balancing.
+
+- **Parallelization**: If a stage in the pipeline becomes a bottleneck, it can be parallelized by splitting the data into multiple concurrent stages. This reduces latency and improves overall performance.
+
+- **I/O Buffers**: Introducing input and output buffers between stages with varying delays helps smooth out data flow and improve throughput. Buffers can be used to regulate the output of stages with variable processing rates and distribute loads on parallelized stages.
+
+![parallelization](assets/images/load-balancing.drawio.svg)
+
+
+### 2.4. Batch VS Streaming Data Pipelines Use Cases
+
+**Differentiating Batch and Streaming Data Pipelines:**
+- Batch Data Pipelines: Operate on datasets as one big unit, typically running periodically on a fixed schedule or triggered by data size. Used when accuracy is critical and recency of data is not a requirement.
+- Streaming Data Pipelines: Ingest packets of information one-by-one in real-time, processing records or events as they occur. Used when minimal latency and near-real-time results are needed.
+
+The use case differences between batch and streaming data processing come down to a tradeoff between accurace and latency requirements. With batch processing, for example, data can be cleaned. And thus you can get higher quality output, but this
+comes at the cost of increased latency. If you require low latency, your tolerance
+for faults likely has to increase.
+
+**Micro-Batch and Hybrid Lambda Data Pipelines:**
+- Micro-Batch Processing: Reducing batch size and increasing refresh rate to achieve near-real-time processing and lower overall latency. Useful when only short windows of data are required for transformations.
+- Lambda Architecture: A hybrid architecture combining batch and streaming data pipelines. Historical data is processed in the batch layer, while real-time data is streamed to the speed layer. The two layers are integrated in the serving layer, filling the "latency gap."
+
+Lambda architecture can be used in cases where access to earlier data is required
+but speed is also important. We usually choose a Lambda architecture we are aiming for accuracy and speed.
+
+**Use Cases for Batch Data Pipelines:**
+- Periodic data backups.
+- Loading transaction history.
+- Customer order processing and billing.
+- Data modeling on slowly varying data.
+- Sales forecasting and weather forecasting.
+- Analysis of historical data.
+- Diagnostic medical image processing.
+
+**Use Cases for Streaming Data Pipelines:**
+- Watching movies, listening to music, or podcasts.
+- Social media feeds and sentiment analysis.
+- Fraud detection.
+- User behavior analysis and targeted advertising.
+- Stock market trading.
+- Real-time product pricing.
+- Recommender systems.
 
 
 <br>
