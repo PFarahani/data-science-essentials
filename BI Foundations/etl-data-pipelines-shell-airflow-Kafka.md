@@ -536,6 +536,11 @@ airflow dags list|grep "my-first-dag"
 airflow tasks list my-first-dag
 ```
 
+**Note**: If you face issues while submitting the DAG, you can check for errors using the following command in terminal:
+```bash
+airflow dags list-import-errors
+```
+
 
 <br>
 <br>
