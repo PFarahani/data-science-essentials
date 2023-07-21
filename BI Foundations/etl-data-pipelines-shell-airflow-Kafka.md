@@ -19,6 +19,8 @@
   - [2.3. Key Data Pipeline Processes](#23-key-data-pipeline-processes)
   - [2.4. Batch VS Streaming Data Pipelines Use Cases](#24-batch-vs-streaming-data-pipelines-use-cases)
 - [3. Apache Airflow](#3-apache-airflow)
+  - [3.1. Apache Airflow Overview](#31-apache-airflow-overview)
+  - [3.2. Create a DAG for Apache Airflow](#32-create-a-dag-for-apache-airflow)
 - [4. Apache Kafka](#4-apache-kafka)
   - [4.1. Distributed Event Streaming Platform Components](#41-distributed-event-streaming-platform-components)
   - [4.2. Apache Kafka Overview](#42-apache-kafka-overview)
@@ -385,7 +387,8 @@ but speed is also important. We usually choose a Lambda architecture we are aimi
 
 ## 3. Apache Airflow
 
-1. **Apache Airflow Overview**
+### 3.1. Apache Airflow Overview
+
    - Apache Airflow is a platform for programmatically authoring, scheduling, and monitoring workflows.
    - Workflows are represented as Directed Acyclic Graphs (DAGs) consisting of tasks with dependencies.
    - Airflow is not a data streaming solution but primarily a workflow manager.
@@ -393,31 +396,145 @@ but speed is also important. We usually choose a Lambda architecture we are aimi
    - Popular tools and libraries for building data pipelines include Pandas, Dask, Vaex, Apache Spark, and PostgreSQL.
    - Examples of Airflow-related tools are Apache Airflow, Talend Open Studio, AWS Glue, Panoply, Alteryx, IBM InfoSphere DataStage, and IBM Streams.
 
-2. **Advantages of Representing Data Pipelines as DAGs in Airflow**
+1. **Advantages of Representing Data Pipelines as DAGs in Airflow**
    - DAGs are directed acyclic graphs used to represent workflows in Airflow.
    - DAGs define tasks and their dependencies, specifying the order of execution.
    - DAGs are defined as Python scripts that instantiate DAG objects and define tasks using operators.
    - Airflow Scheduler handles the execution of tasks on workers based on the specified dependencies.
    - Advantages of representing workflows as DAGs include scalability, dynamism, extensibility, and maintainability.
 
-3. **Apache Airflow UI**
+2. **Apache Airflow UI**
    - The Airflow User Interface provides a comprehensive view of DAGs, tasks, and their statuses.
    - DAGs can be visualized in different ways, such as tree view and graph view.
    - The UI allows for task instance selection, code review, and task duration analysis.
    - Airflow UI simplifies monitoring, scheduling, and management of workflows, making it user-friendly and collaborative.
 
-4. **Build a DAG Using Airflow**
+3. **Build a DAG Using Airflow**
    - Airflow DAGs are defined as Python scripts with logical blocks: library imports, DAG arguments, DAG definition, task definitions, and task pipeline.
    - Tasks are instantiated using operators such as Bash Operator, Python Operator, and SQL Operator.
    - Dependencies between tasks are specified using the `>>` notation, defining the order of task execution.
    - DAGs can have a schedule interval for repeated execution.
 
-5. **Airflow Logging and Monitoring**
+4. **Airflow Logging and Monitoring**
    - Airflow provides logging capabilities for monitoring task status and diagnosing issues.
    - Log files are stored locally, and for production deployments, they can be sent to cloud storage or search engines like Elasticsearch and Splunk.
    - Airflow UI allows for easy access and review of task events.
    - Metrics, including counters, gauges, and timers, are produced to monitor component health.
    - Metrics should be sent to dedicated repositories like Prometheus via StatsD for monitoring and analysis.
+
+
+### 3.2. Create a DAG for Apache Airflow
+
+**Step 1 - Start Apache Airflow and Open the Airflow Web UI**
+
+```bash
+start_airflow
+```
+When airflow starts successfully, you should see a URL to for accessing the Airflow's UI. 
+
+**Step 2 - Explore the anatomy of a DAG**
+
+An Apache Airflow DAG is a python program. It consists of these logical blocks.
+
+- Imports
+- DAG Arguments
+- DAG Definition
+- Task Definitions
+- Task Pipeline
+
+A typical `imports` block looks like this.
+```python
+# import the libraries
+
+from datetime import timedelta
+# The DAG object; we'll need this to instantiate a DAG
+from airflow import DAG
+# Operators; we need this to write tasks!
+from airflow.operators.bash_operator import BashOperator
+# This makes scheduling easy
+from airflow.utils.dates import days_ago
+```
+
+A typical `DAG Arguments` block looks like this.
+```python
+#defining DAG arguments
+
+# You can override them on a per-task basis during operator initialization
+default_args = {
+    'owner': 'Owner Name',
+    'start_date': days_ago(0),
+    'email': ['owner@mail.com'],
+    'email_on_failure': True,
+    'email_on_retry': True,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+```
+
+A typical `DAG definition` block looks like this.
+```python
+# define the DAG
+dag = DAG(
+    dag_id='sample-etl-dag',
+    default_args=default_args,
+    description='Sample ETL DAG using Bash',
+    schedule_interval=timedelta(days=1),
+)
+```
+
+A typical `task definitions` block looks like this:
+```python
+# define the tasks
+
+# define the first task named extract
+extract = BashOperator(
+    task_id='extract',
+    bash_command='echo "extract"',
+    dag=dag,
+)
+
+# define the second task named transform
+transform = BashOperator(
+    task_id='transform',
+    bash_command='echo "transform"',
+    dag=dag,
+)
+
+# define the third task named load
+
+load = BashOperator(
+    task_id='load',
+    bash_command='echo "load"',
+    dag=dag,
+)
+```
+
+A typical `task pipeline` block looks like this:
+```python
+# task pipeline
+extract >> transform >> load
+```
+Task pipeline helps us to organize the order of tasks.
+
+Here the task `extract` must run first, followed by `transform`, followed by the task `load`.
+
+
+**Step 3 - Submit a DAG**
+
+Submitting a DAG is as simple as copying the DAG python file into `dags` folder in the `AIRFLOW_HOME` directory.
+
+```bash
+cp my_first_dag.py $AIRFLOW_HOME/dags
+
+#  List out all the existing DAGs
+airflow dags list
+
+# Verify that "my-first-dag" is a part of the output.
+airflow dags list|grep "my-first-dag"
+
+# List out all the tasks in "my-first-dag"
+airflow tasks list my-first-dag
+```
 
 
 <br>
