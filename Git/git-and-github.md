@@ -212,7 +212,7 @@ Inside the file, we can write patterns to tell Git which files & folders to igno
 We'll often come across the term `HEAD` in Git.
 `HEAD` is simply a pointer that refers to the current "location" in your repository. It points to a particular branch reference.
 
-![image1](assets/images/image1.png)
+![Branch Head](assets/images/branch-head.drawio.svg)
 
 ```bash
 git branch
@@ -279,15 +279,16 @@ git merge "specific-branch-name"
 > 
 > This happens all the time! Imagine one of your teammates merged in a new feature or change to master while you were working on a branch
 > 
-> ![image2](assets/images/image2.png)
+> ![Merging a Branch - New Feature Added](assets/images/merge-branch-new-commit.drawio.svg)
 
 
 > What happens when I try to merge?
 > 
 > Rather than performing a simple fast forward, git performs a "merge commit" We end up with a new commit on the master branch. Git will prompt you for a message.
 > 
-> ![image3](assets/images/image3.png)
-> ![image4](assets/images/image4.png)
+> ![Merging a Branch - Change Head](assets/images/merge-branch-move-head.drawio.svg)
+> 
+> ![Merging a Branch - Merge](assets/images/merge-branch-merge.drawio.svg)
 
 
 **Whenever you encounter merge conflicts, follow these steps to resolve them:**
@@ -357,14 +358,14 @@ Git provides an easy way of stashing these uncommitted changes so that we can re
 
 Running `git stash` will take all uncommitted changes (staged and unstaged) and stash them, reverting the changes in your working copy.
 
-![image5](assets/images/image5.png)
+![Stashing](assets/images/stashing.drawio.svg)
 
 ```bash
 git stash
 ```
 **Note:** You can also use `git stash save` instead.
 
-![image6](assets/images/image6.png)
+![Git Stash Save](assets/images/git-stash-save.drawio.svg)
 
 Use `git stash pop` to remove the most recently stashed changes in your stash and re-apply them to your working copy.
 
@@ -378,7 +379,7 @@ You can use `git stash apply` to apply whatever is stashed away, without removin
 git stash apply
 ```
 
-![image7](assets/images/image7.png)
+![Git Stash Apply](assets/images/git-stash-apply.drawio.svg)
 
 
 If you have untracked files (files that you have never checked in to Git), they will not be included in the stash.
@@ -445,13 +446,13 @@ git checkout <commit-hash>
 >
 > Suppose you want to go back to an old commit and make some new changes. With `git checkout <commit-hash>` you'll be in a detached HEAD state.
 >
-> ![image8](assets/images/image8.png)
+> ![Git Checkout](assets/images/git-checkout-initial.drawio.svg)
 >
 > ```bash
 > git checkout d8194d6
 > ```
 >
-> ![image9](assets/images/image9.png)
+> ![Git Checkout - Checkout](assets/images/git-checkout.drawio.svg)
 > 
 > While in detached HEAD, make a new branch and switch to it. Head is now back to pointing at a branch reference!
 > 
@@ -459,7 +460,7 @@ git checkout <commit-hash>
 > git switch -c newbranch
 > ```
 > 
-> ![image10](assets/images/image9.png)
+> ![Git Checkout - Switch Branch](assets/images/git-checkout-switch.drawio.svg)
 >
 > Now on the new branch, make as many new commits as you want.
 >
@@ -468,7 +469,7 @@ git checkout <commit-hash>
 > git commit -m "new commit"
 > ````
 >
-> ![image11](assets/images/image10.png)
+> ![Git Checkout - New Commit](assets/images/git-checkout-commit.drawio.svg)
 
 To reference previous commits using `git checkout` use the syntax below:
 
@@ -525,31 +526,31 @@ git reset <commit-hash>
 
 `git reset` actually moves the branch pointer backwards, eliminating commits.
 
-`git revert` instead creates a brand new commit which reverses/undos the changes from a commit. Because it results in a new commit, you will be prompted to enter a commit message.
+`git revert` instead creates a brand new commit which reverses/undoes the changes from a commit. Because it results in a new commit, you will be prompted to enter a commit message.
 ```bash
 git revert <commit-hash>
 ```
 > **Note:** If you want to reverse some commits that other people already have on their machines, you should use `git revert`. If you want to reverse commits that you haven't shared with others, use `git reset` and no one will ever know!
 >
-> ![image12](assets/images/image12.png)
+> ![Initial State](assets/images/git-reset-initial.drawio.svg)
 >
 > ```bash
 > git reset HEAD~2
 > ```
 >
-> ![image13](assets/images/image13.png)
+> ![Git Reset](assets/images/git-reset.drawio.svg)
 >
 > The branch pointer is moved back to an earlier commit, erasing the 2 later commits.
 >
-> ![image12](assets/images/image12.png)
+> ![Initial State](assets/images/git-reset-initial.drawio.svg)
 >
 > ```bash
 > git revert 51494a6
 > ```
 >
-> ![image14](assets/images/image14.png)
+> ![Git Revert](assets/images/git-revert.drawio.svg)
 >
-> This new commit reverses the changes from 51494a6.
+> This new commit reverses the changes from "51494a6".
 
 
 <br>
@@ -728,7 +729,7 @@ git switch feature
 git rebase master
 ```
 
-![image15](assets/images/image15.png)
+![Merging with Rebase](assets/images/git-rebase.drawio.svg)
 
 **WARNING!**
 
