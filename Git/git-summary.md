@@ -1,4 +1,4 @@
-<img src="assets/git-logo.svg" width="250" height="250">
+<img src="https://git-scm.com/images/logos/downloads/Git-Logo-2Color.svg" width="250" height="250">
 
 
 # Git Commands Summary <!-- omit from toc -->
