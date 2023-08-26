@@ -344,6 +344,64 @@ WINDOW w AS (PARTITION BY s.surgeon_id)
 
 See the full list: [https://www.postgresql.org/docs/current/functions-window.html](https://www.postgresql.org/docs/current/functions-window.html) 
 
+**Difference between RANK() and DENSE_RANK():** `RANK()` leaves gaps when there are ties in the ranking, while `DENSE_RANK()` does not leave any gaps and keeps consecutive ranks even for tied values.
+
+Here's an example to illustrate:
+
+Suppose you have a table "Scores" with two columns: "Player" and "Score". You want to rank players based on their scores.
+
+```
+Player   Score
+----------------
+Alice    90
+Bob      85
+Charlie  80
+David    85
+Eve      90
+```
+
+Using `RANK()`:
+```sql
+SELECT
+  Player,
+  Score,
+  RANK() OVER (ORDER BY Score DESC) AS Rank
+FROM
+  Scores;
+```
+
+Output:
+```
+Player   Score   Rank
+----------------------
+Alice    90      1
+Eve      90      1
+Bob      85      3
+David    85      3
+Charlie  80      5
+```
+
+Using `DENSE_RANK()`:
+```sql
+SELECT
+  Player,
+  Score,
+  DENSE_RANK() OVER (ORDER BY Score DESC) AS Dense_Rank
+FROM
+  Scores;
+```
+
+Output:
+```
+Player   Score   Dense_Rank
+---------------------------
+Alice    90      1
+Eve      90      1
+Bob      85      2
+David    85      2
+Charlie  80      3
+```
+
 
 ### 2.1. Find Duplicates with RANK
 
@@ -468,8 +526,8 @@ The result of `CROSS JOIN` would be the following:
 t1.col_1    t1.col_2    t2.col_1    t2.col_2
 --------    --------    --------    --------
 a           b           1           2
-a           c           1           3
-a           b           1           2
+a           c           1           2
+a           b           1           3
 a           c           1           3
 ```
 
