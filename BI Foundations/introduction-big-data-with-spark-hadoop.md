@@ -25,6 +25,8 @@
     - [2.5.1. HBase Introduction](#251-hbase-introduction)
     - [2.5.2. HBase Architecture](#252-hbase-architecture)
   - [2.6. Summary](#26-summary)
+- [3. Introduction to Apache Spark](#3-introduction-to-apache-spark)
+  - [3.1. Understanding Functional Programming](#31-understanding-functional-programming)
 
 
 <br>
@@ -976,3 +978,78 @@ In summary, Hive is a powerful tool within the Hadoop ecosystem, providing a fam
 <br>
 
 ***
+
+## 3. Introduction to Apache Spark
+
+**Apache Spark Attributes**
+
+- **Open Source:** Developed and maintained by the Apache Foundation, Spark is freely available for anyone to use and contribute to.
+- **In-Memory Processing:** All operations are performed <u>within the memory</u> (RAM), enabling lightning-fast processing speeds.
+- **Distributed Data Processing:** Spark leverages <u>distributed</u> computing across multiple nodes to handle massive datasets efficiently.
+- **Scalability:** Designed to scale seamlessly with growing data volumes, Spark can handle petabytes of data with ease.
+- **Programming Flexibility:** Written primarily in <u>Scala</u> but offers APIs in Python, Java, and other languages, allowing developers to work in their preferred environment.
+
+**Distributed Computing**
+
+Distributed computing involves multiple computers or processors collaborating to solve complex problems.
+
+**Key Benefits:**
+
+- **Scalability and Modular Growth:** Distributed systems can scale horizontally by adding more machines, offering virtually limitless scalability.
+
+- **Fault Tolerance and Redundancy:** Distributed systems provide fault tolerance and redundancy, ensuring business continuity even in the face of hardware failures.
+
+**Note:** Distributed computing processors usually have their own private or distributed memory while parallel computing processors access shared memory.
+
+![Parallel Vs. Distributed Computing](./assets/images/parallel-vs-distributed-computin.drawio.svg)
+
+
+**Apache Spark vs. MapReduce:**
+
+- **Read/Write Efficiency:** MapReduce often incurs time-consuming disk reads and writes, while Spark keeps much of the data in-memory, reducing I/O overhead and processing times significantly.
+
+- **Flexibility:** Spark offers a comprehensive framework for both data engineering and data science tasks, supporting diverse use cases with ease.
+
+- **Parallelism:** Spark's parallel distributed processing capabilities enable efficient execution of complex computations across distributed datasets.
+
+- **APIs and Libraries:** Spark provides easy-to-use APIs and libraries, such as SparkSQL, DataFrames, SparkML, and Streaming, catering to various application needs.
+
+
+### 3.1. Understanding Functional Programming
+
+Functional Programming (FP) is a programming paradigm that emphasizes writing code in a declarative manner, focusing on mathematical functions.
+
+**Declarative vs. Imperative:** Declarative syntax abstracts implementation details, emphasizing the "what" of the solution rather than the "how". Declarative syntax abstracts out the implementation details and only emphasizes on the final output.
+
+**Note:** FP uses expressions like `f(x)` to represent functions, treating functions as first-class citizens.
+
+![An Example of Functional Programming](./assets/images/functional-programming-example.drawio.svg)
+
+
+**Lambda Functions:** Lambda functions, or anonymous functions, are used extensively in FP to write concise and expressive code.
+
+Example code snippets in Scala and Python demonstrate the use of lambda functions to perform simple arithmetic operations.
+
+```scala
+// an example lambda operator in Scala to add 2 numbers
+
+val add = (x:Int, y:Int) => x + y
+println(add(1,2))
+```
+
+```py
+# an example python operator in Scala to add 2 numbers
+add = lambda x, y : x + y
+print(add(1,2))
+```
+
+**Parallelization in Functional Programming:**
+
+- **Benefits:** Functional programming enables implicit parallelization, allowing tasks to be split into multiple computing chunks and run in parallel.
+- **Scalability:** Adding more resources to the computing environment scales the algorithm without modifying the code, making it highly scalable.
+
+**Apache Spark and Functional Programming:**
+
+- **Spark's Architecture:** Apache Spark, written mainly in Scala, leverages functional programming principles to parallelize computations and process big data efficiently.
+- **Lambda Calculus in Spark:** Spark utilizes lambda functions to distribute work between worker nodes and perform parallelized computations.
+- **Inherent Parallelism:** All Spark programs implemented in a functional style are inherently parallel, making them capable of processing massive datasets without scalability issues.
