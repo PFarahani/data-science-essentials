@@ -2,23 +2,37 @@
 
 This repository contains a collection of summaries and cheat sheets for various courses and subjects, including machine learning, data science, and software tutorials.
 
-## Table of contents
+## Table of Contents
 
-- [SQL](SQL/)
-    - [Microsoft SQL Server](SQL/Microsoft%20SQL%20Server/)
-        - [Microsoft SQL Server Summary](SQL/Microsoft%20SQL%20Server/microsoft-sql-server-summary.md)
-    - [PostgreSQL](SQL/PostgreSQL/)
-        - [PostgreSQL Basics - Summary](SQL/PostgreSQL/postgresql-basics-summary.md)
-        - [PostgreSQL Advanced - Summary](SQL/PostgreSQL/postgresql-advanced-summary.md)
-        <!-- - [postgres-cheatsheet.md](SQL/PostgreSQL/postgres-cheatsheet.md) -->
-        - [SQL Cheatsheet](SQL/PostgreSQL/sql-cheatsheet.md)
-    <!-- - [SQL_Optimization.pdf](SQL/SQL_Optimization.pdf)
-    - [SQL_Basics_and_Advanced.pdf](SQL/SQL_Basics_and_Advanced.pdf) -->
-
-- [Git](Git/)
-  - [Git \& GitHub](Git/git-and-github.md)
-  - [Git Commands Summary](Git/git-summary.md)
-
-- [Linux and Unix](Linux%20and%20Unix/)
-  - [Linux Commands and Shell Scripting](Linux%20and%20Unix/linux-commands-and-shell-scripting.md)
-  - [Ubuntu Server Administration Basics](Linux%20and%20Unix/ubuntu-server-administration-basics.md)
+1. [BI Foundations](/BI%20Foundations/)
+   1. [Introduction to Big Data with Spark and Hadoop](/BI%20Foundations/introduction-big-data-with-spark-hadoop.md)
+   2. [ETL Processes using PySpark](/BI%20Foundations/etl-processes-using-pyspark.md)
+   3. [ETL Data Pipelines with Shell, Airflow, and Kafka](/BI%20Foundations/etl-data-pipelines-shell-airflow-kafka.md)
+   4. [Data Warehousing and BI Analytics](/BI%20Foundations/data-warehousing-bi-analytics.md)
+   5. [Dimensional Modeling](/BI%20Foundations/dimensional-modeling-summary.md)
+   6. [Machine Learning with Spark](/BI%20Foundations/data-engineering-machine-learning-using-spark.md)
+   7. [SQL vs. PySpark](/BI%20Foundations/sql-vs-pyspark.md)
+2. [Data Science](/Data%20Science/)
+   1. [Introduction to NumPy](/Data%20Science/introduction-to-numpy.md)
+   2. [Data Cleaning: A Brief Guide](/Data%20Science/data-cleaning-brief-guide.md)
+   3. [Data Visualization](/Data%20Science/choose-the-right-data-visualization.md)
+3. [Git](/Git/)
+   1. [Git and GitHub](/Git/git-and-github.md)
+   2. [Git Summary](/Git/git-summary.md)
+4. [Linux and Unix](/Linux%20and%20Unix/)
+   1. [Linux Commands and Shell Scripting](/Linux%20and%20Unix/linux-commands-and-shell-scripting.md)
+   2. [Ubuntu Server Administration Basics](/Linux%20and%20Unix/ubuntu-server-administration-basics.md)
+5. [SQL](/SQL/)
+   1. [Complex SQL Queries](/SQL/complex-sql-queries.md)
+   2. [Microsoft SQL Server](/SQL/Microsoft%20SQL%20Server/)
+      1. [Microsoft SQL Server Summary](/SQL/Microsoft%20SQL%20Server/microsoft-sql-server-summary.md)
+   3. [PostgreSQL](/SQL/PostgreSQL/)
+      1. [SQL CheatSheet](/SQL/PostgreSQL/sql-cheatsheet.md)
+      2. [PostgreSQL CheatSheet](/SQL/PostgreSQL/postgres-cheatsheet.md)
+      3. [PostgreSQL Basics Summary](/SQL/PostgreSQL/postgresql-basics-summary.md)
+      4. [PostgreSQL Advanced Summary](/SQL/PostgreSQL/postgresql-advanced-summary.md)
+6. [Utilities](/Utilities/)
+   1. [Docker Quick Reference](/Utilities/docker-quick-reference.md)
+   2. [RegEx](/Utilities/RegEx/)
+      - [Regular Expression CheatSheet](/Utilities/RegEx/regular-expression-cheat-sheet.md)
+      - [Regular Expression Quick Reference](/Utilities/RegEx/regular-expression-quick-reference.md)
