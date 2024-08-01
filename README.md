@@ -1,4 +1,4 @@
-# Course Summaries
+# DataScience Essentials
 
 This repository contains a collection of summaries and cheat sheets for various courses and subjects, including machine learning, data science, and software tutorials.
 
