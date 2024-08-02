@@ -24,6 +24,7 @@ This repository contains a collection of summaries and cheat sheets for various 
   - [Ubuntu Server Administration Basics](/Linux%20and%20Unix/ubuntu-server-administration-basics.md)
 - [SQL](/SQL/)
   - [Complex SQL Queries](/SQL/complex-sql-queries.md)
+  - [SQL Optimization Techniques](/SQL/sql-optimization-techniques.md)
   - [Microsoft SQL Server](/SQL/Microsoft%20SQL%20Server/)
       - [Microsoft SQL Server Summary](/SQL/Microsoft%20SQL%20Server/microsoft-sql-server-summary.md)
    - [PostgreSQL](/SQL/PostgreSQL/)
